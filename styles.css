@@ -1,37 +1,42 @@
 /* used flexbox to center content */
 
 html, body {
-
+    overflow: hidden;
 }
 
 canvas {
-    background: transparent;
-    border-bottom:2px solid #663700;
+    position: absolute;
+
+    background: #5f5f5f;
     height:100%;
     width:100%;
 }
 
-#basket img {
+#basket {
     display: block;
     position: absolute;
     top: 55px;
-    left: 20px;
-    min-width: 228px;
-    height: 193px;
+    left: 800px;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 
 
 /* wrapper for 800x600 screen */
 
 #allWrapper {
-
-    position: relative;
     height: 100%;
 
     min-width: 100%;
-    background: url("http://svgur.com/i/5Y.svg");
-    background-size: cover;
+
     z-index: -5;
+
 }
 
 
