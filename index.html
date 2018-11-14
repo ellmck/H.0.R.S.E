@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>H.O.R.S.E</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
 
 </head>
 
@@ -28,6 +28,22 @@
 </div>
 </div>
 </body>
+<script src="serviceWorker.js.js"></script>
+<script src="app.js"></script>
 
-<script src="gameStyling.js"></script>
-<script src="ballPhysics.js"></script>
+<script>
+    window.addEventListener('load', async e => {
+        await fetchTrending();
+
+        if ('serviceWorker' in navigator) {
+            try {
+                navigator.serviceWorker.register('serviceWorker.js');
+                console.log('SW registered');
+
+            } catch (error) {
+                console.log('SW failed');
+
+            }
+        }
+    });
+</script>
