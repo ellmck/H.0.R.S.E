@@ -1,0 +1,122 @@
+/* used flexbox to center content */
+
+html, body {
+
+}
+
+canvas {
+    background: transparent;
+    border-bottom:2px solid #663700;
+    height:100%;
+    width:100%;
+}
+
+#basket img {
+    display: block;
+    position: absolute;
+    top: 55px;
+    left: 20px;
+    min-width: 228px;
+    height: 193px;
+}
+
+
+/* wrapper for 800x600 screen */
+
+#allWrapper {
+
+    position: relative;
+    height: 100%;
+
+    min-width: 100%;
+    background: url("http://svgur.com/i/5Y.svg");
+    background-size: cover;
+    z-index: -5;
+}
+
+
+/* animation container */
+
+#ballWrapper {
+    width: 100px;
+    height: 260px;
+    display: block;
+    position: absolute;
+    cursor: pointer;
+    left: 47%;
+    top: 35%;
+}
+
+#ball {
+    width: 70px;
+    height: 70px;
+    position: relative;
+    animation: jump 1s infinite;
+    overflow: hidden;
+}
+
+
+/*Ball texture*/
+
+#ball:after {
+    content: "";
+    width: 70px;
+    height: 70px;
+    border-radius: 100%;
+    background: url("http://svgur.com/i/4D.svg");
+    position: absolute;
+    animation: rotate 2s infinite, back 1s infinite;
+    z-index: 5;
+    background-repeat: repeat;
+    background-size: cover;
+    animation-timing-function: linear;
+}
+
+
+/*Ball light*/
+
+#ball:before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-image: url("http://svgur.com/i/5C.svg");
+    background-size: 110%;
+    border-radius: 100%;
+    animation: lightop 1s infinite;
+}
+
+
+/*Shadow on ball*/
+
+#ballshad {
+    background: url("http://svgur.com/i/5P.svg");
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    border-radius: 100%;
+    animation: shadop 1s infinite;
+    margin: auto;
+    display: block;
+    background-size: contain;
+    z-index: 10;
+}
+
+
+/*Shadow on floor*/
+
+#ballShadow {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    z-index: 10;
+    margin-left: -30px;
+    background-image: url("http://svgur.com/i/4V.svg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    animation: shrink 1s infinite;
+    z-index: -1;
+    background-position: center;
+}
