@@ -62,6 +62,9 @@ var mouseUp = function(e) {
 var setup = function() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
+    window.addEventListener("touchstart", mouseDown, false);
+    window.addEventListener("touchend", mouseUp, false);
+    window.addEventListener("touchmove", getMousePosition, false);
     window.onmousemove = getMousePosition;
     window.onmousedown = mouseDown;
     window.onmouseup = mouseUp;
@@ -71,7 +74,6 @@ var setup = function() {
     loopTimer = setInterval(loop, frameDelay);
 }
 var loop = function() {
-
 
     if ( ! mouse.isDown) {
         // Do physics
@@ -101,7 +103,6 @@ var loop = function() {
     // ball is rolling along the bottom
     if (ball.position.y == canvas.height - ball.radius)
     {
-        console.log("ROLLING");
         ball.velocity.x *= ball.restitution;;
     }
     // Draw the ball
