@@ -1,0 +1,16 @@
+{
+  "name": "H.O.R.S.E Basketball Game",
+  "short_name": "H.O.R.S.E",
+  "lang": "en-UK",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#0099cc",
+  "icons": [
+    {
+      "src": "webappIcon",
+      "sizes": "192x192",
+      "type": "png"
+    }
+  ]
+}
