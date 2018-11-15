@@ -8,19 +8,7 @@ var basket = document.getElementById("basket");
 
 var ballStartingX ;
 var ballStartingY ;
-/*
- * Experiment with values of mass, radius, restitution,
- * gravity (ag), and density (rho)!
- * 
- * Changing the constants literally changes the environment
- * the ball is in. 
- * 
- * Some settings to try:
- * the moon: ag = 1.6
- * water: rho = 1000, mass 5
- * beach ball: mass 0.05, radius 30
- * lead ball: mass 10, restitution -0.05
- */
+
 var ball = {
     position: {x: canvas.width*0.5, y: 0},
     velocity: {x: 10, y: 0},
@@ -30,11 +18,17 @@ var ball = {
     friction: -0.7
 };
 
-var backboard = {
-    x: basket.offsetLeft - basket.offsetLeft * 0.018,
-    y: basket.offsetTop + basket.offsetTop + basket.offsetTop,
-    w: 10,
-    h: 100
+var ballNetRatio = 2;
+var ballBackboardRatio = 4.4;
+var backboardOffsetRatio = 0.62;
+
+var net = {
+
+    backboard: {x: 0, y: 0, w: 10, h: 0},
+    rightRim: {x: 0, y: 0, w: 8, h: 8},
+    leftRim: {x: 0, y: 0, w: 8, h: 8},
+    backboardConnector: {x: 0, y: 0, w: 4, h: 4}
+
 };
 
 
@@ -49,11 +43,15 @@ basketballImage.onload = function() {
 
 var mouse = {x: 0, y: 0, isDown: false};
 
+window.onresize = function(){onResize(canvas)};
+
+
 function getMousePosition(e) {
     mouse.x = e.pageX - canvas.offsetLeft;
     mouse.y = e.pageY - canvas.offsetTop;
 }
 var mouseDown = function(e) {
+    e.preventDefault();
     if (e.which == 1) {
         getMousePosition(e);
         mouse.isDown = true;
@@ -65,6 +63,7 @@ var mouseDown = function(e) {
     }
 }
 var mouseUp = function(e) {
+    e.preventDefault();
     if (e.which == 1) {
         mouse.isDown = false;
         ball.velocity.y = (ballStartingY - ball.position.y) *0.1;
@@ -75,11 +74,18 @@ var mouseUp = function(e) {
 var draw = function() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
-    ball.radius = canvas.width * 0.025;
-    basket.style.top = canvas.height*0.15 + "px";
-    basket.style.left = canvas.width - (canvas.width * 0.3) + "px";
-    basket.style.width = ball.radius * 10
-    basket.ondragstart = function() { return false; };
+    ball.radius = canvas.width * 0.02;
+    net.backboard.h = (ball.radius* 2) * ballBackboardRatio;
+    net.backboard.x = canvas.width - (canvas.width * 0.15);
+    net.backboard.y = (canvas.height*0.4) - net.backboard.h - ((ball.radius* 2) * backboardOffsetRatio);
+    net.rightRim.x = net.backboard.x -  net.rightRim.w - ((ball.radius * 2) * backboardOffsetRatio);
+    net.rightRim.y = net.backboard.y + net.backboard.h - ((ball.radius * 2) * backboardOffsetRatio);
+    net.leftRim.x = net.rightRim.x - net.rightRim.w - ((ball.radius* 2) * ballNetRatio);
+    net.leftRim.y = net.rightRim.y;
+    net.backboardConnector.x = net.rightRim.x + net.rightRim.w;
+    net.backboardConnector.w = net.backboard.x - net.rightRim.x;
+    net.backboardConnector.y = net.rightRim.y + net.backboardConnector.h * 0.5;
+    net.leftRim.y = net.rightRim.y;
 
     window.ontouchmove = getMousePosition;
     window.ontouchdown = mouseDown;
@@ -89,10 +95,13 @@ var draw = function() {
     window.onmouseup = mouseUp;
 
 
-    context.fillStyle = 'red';
+
+    context.fillStyle = "#5f5f5f";
     context.strokeStyle = '#000000';
     loopTimer = setInterval(loop, frameDelay);
 }
+
+
 var loop = function() {
 
     if ( ! mouse.isDown)
@@ -129,11 +138,17 @@ var loop = function() {
         ball.velocity.x *= ball.restitution;;
     }
 
-    objectCollision(backboard);
+    objectCollision(ball, net.backboard);
+    objectCollision(ball, net.rightRim);
+    objectCollision(ball, net.leftRim);
+    objectCollision(ball, net.backboardConnector);
 
-    //draw ball
+
     context.clearRect(0,0,canvas.width,canvas.height);
     context.save();
+
+
+    //draw ball
     context.translate(ball.position.x, ball.position.y);
     context.beginPath();
     context.arc(0, 0, ball.radius, 0, Math.PI*2, true);
@@ -141,14 +156,17 @@ var loop = function() {
     context.closePath();
 
 
+
     context.restore();
     context.save();
 
     //DRAWING OF COLLISION OBJECTS WONT BE NEEDED ONCE PHYSICS IS COMPLETE
-    //draw backboard
+    //draw net: backboard, rightRim, leftRim, backboardConnector
     context.stroke();
-    context.strokeRect(backboard.x, backboard.y, backboard.w, backboard.h);
-
+    context.strokeRect(net.backboard.x, net.backboard.y, net.backboard.w, net.backboard.h);
+    context.strokeRect(net.leftRim.x, net.leftRim.y, net.leftRim.w, net.leftRim.h);
+    context.strokeRect(net.rightRim.x, net.rightRim.y, net.rightRim.w, net.rightRim.h);
+    context.strokeRect(net.backboardConnector.x, net.backboardConnector.y, net.backboardConnector.w, net.backboardConnector.h);
 
     // Draw the slingshot
     if (mouse.isDown) {
@@ -162,32 +180,63 @@ var loop = function() {
     }
 
 }
+
 draw();
+
 
 var onResize = function(){
 
-    setInterval(draw(), 2000);
+    setInterval(draw(), 20000);
 }
 
-window.onresize = function(){onResize(canvas)};
 
-// (((ballX + ballRadius >= object.left) &&
-//     (ballX - ballRadius <= object.right) &&
-//     (ballY - ballRadius <= object.top) &&
-//     (ballY + ballRadius >= object.bottom)) &&
-//     (isMovingTowardsObject(ball, object.left, obj
+function objectCollision(ball, rect) {
 
-function objectCollision(rect) {
+    if ((ball.position.x + ball.radius  + ball.velocity.x > rect.x) &&
+        (ball.position.x - ball.radius  + ball.velocity.x < rect.x + rect.w)&&
+        (ball.position.y + ball.radius + ball.velocity.y > rect.y) &&
+        (ball.position.y - ball.radius + ball.velocity.y < rect.y + rect.h)) {
+        if (ball.position.x + ball.radius <= rect.x) {
 
-    if ((ball.position.x + ball.radius >= rect.x) &&
-        (ball.position.x - ball.radius <= rect.x + rect.w) )
-    {
+            ball.position.x = rect.x - ball.radius;
+
+        }
+        else if (ball.position.x - ball.radius >= rect.x)
+        {
+            ball.position.x =  rect.x + rect.w + ball.radius;
+        }
+
+
         ball.velocity.x *= ball.friction;
+
     }
+
+    if ((ball.position.x + ball.radius  + ball.velocity.x > rect.x) &&
+        (ball.position.x - ball.radius  + ball.velocity.x < rect.x)&&
+        (ball.position.y + ball.radius - ball.velocity.y > rect.y ) &&
+        (ball.position.y - ball.radius - ball.velocity.y < rect.y + rect.h))
+    {
+
+        ball.velocity.y *= ball.friction;
+    }
+
+}
+
+function isCircleColliding(ball, rim) {
+    /*
+    * we have a collision!
+    * edge case to consider: balls may get stuck colliding back and forth
+    * between each other for a few frames if they don't fully "separate"
+    * from each other in one frame of motion.
+   */
+    return (Math.abs(ball.x - rim.x) < rim.r && Math.abs(ball.y - rim.y) < rim.r );
+
 }
 
 
-var isMovingTowardsPoint = function(objectX, objectY)
+
+
+var isMovingTowardsObject = function(objectX, objectY)
 {
     var xDist = ball.x - objectX;
     var yDist = ball.x - objectY;
