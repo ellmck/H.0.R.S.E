@@ -4,7 +4,6 @@ var loopTimer = false;
 
 var canvas = document.getElementById("canvas");
 var context = canvas.getContext("2d");
-var basket = document.getElementById("basket");
 
 var ballStartingX ;
 var ballStartingY ;
@@ -24,7 +23,7 @@ var backboardOffsetRatio = 0.62;
 
 var net = {
 
-    backboard: {x: 0, y: 0, w: 10, h: 0},
+    backboard: {x: 0, y: 0, w: 30, h: 0},
     rightRim: {x: 0, y: 0, w: 8, h: 8},
     leftRim: {x: 0, y: 0, w: 8, h: 8},
     backboardConnector: {x: 0, y: 0, w: 4, h: 4}
@@ -47,11 +46,15 @@ window.onresize = function(){onResize(canvas)};
 
 
 function getMousePosition(e) {
+    e.preventDefault();
+
     mouse.x = e.pageX - canvas.offsetLeft;
     mouse.y = e.pageY - canvas.offsetTop;
 }
+
 var mouseDown = function(e) {
     e.preventDefault();
+
     if (e.which == 1) {
         getMousePosition(e);
         mouse.isDown = true;
@@ -71,11 +74,40 @@ var mouseUp = function(e) {
     }
 }
 
+function getTouchPosition(e) {
+    e.preventDefault();
+    mouse.x = e.targetTouches[0].pageX;
+    mouse.y = e.targetTouches[0].pageY;
+}
+
+var touchDown = function(e) {
+    e.preventDefault();
+        getTouchPosition(e);
+        mouse.isDown = true;
+        ball.position.x = mouse.x;
+        ball.position.y = mouse.y;
+        ballStartingX = mouse.x;
+        ballStartingY = mouse.y;
+
+
+}
+var touchUp = function(e) {
+    e.preventDefault();
+
+        mouse.isDown = false;
+        ball.velocity.y = (ballStartingY - ball.position.y) *0.1;
+        ball.velocity.x = (ballStartingX - ball.position.x) *0.1;
+
+}
+
+
 var draw = function() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
     ball.radius = canvas.width * 0.02;
     net.backboard.h = (ball.radius* 2) * ballBackboardRatio;
+    net.backboard.w =  (ball.radius* 2);
+
     net.backboard.x = canvas.width - (canvas.width * 0.15);
     net.backboard.y = (canvas.height*0.4) - net.backboard.h - ((ball.radius* 2) * backboardOffsetRatio);
     net.rightRim.x = net.backboard.x -  net.rightRim.w - ((ball.radius * 2) * backboardOffsetRatio);
@@ -87,12 +119,12 @@ var draw = function() {
     net.backboardConnector.y = net.rightRim.y + net.backboardConnector.h * 0.5;
     net.leftRim.y = net.rightRim.y;
 
-    window.ontouchmove = getMousePosition;
-    window.ontouchdown = mouseDown;
-    window.ontouchup = mouseUp;
-    window.onmousemove = getMousePosition;
-    window.onmousedown = mouseDown;
-    window.onmouseup = mouseUp;
+    canvas.ontouchmove = getTouchPosition;
+    canvas.ontouchstart = touchDown;
+    canvas.ontouchend = touchUp;
+    canvas.onmousemove = getMousePosition;
+    canvas.onmousedown = mouseDown;
+    canvas.onmouseup = mouseUp;
 
 
 
