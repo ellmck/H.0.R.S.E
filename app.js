@@ -2,15 +2,16 @@ var hoop = document.getElementsByTagName("p");
 var scoreBoard = document.getElementsByClassName("score");
 scoreBoard[0].innerText = 0;
 
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
 
 // Matter.js module aliases
-var Engine, World, Bodies, Body;
-Engine = Matter.Engine;
-World = Matter.World;
-Bodies = Matter.Bodies;
-Body = Matter.Body;
-Render = Matter.Render;
-Constraint = Matter.Constraint,
+var Engine = Matter.Engine;
+    World = Matter.World;
+    Bodies = Matter.Bodies;
+    Body = Matter.Body;
+    Render = Matter.Render;
+    Constraint = Matter.Constraint,
     Composites = Matter.Composites,
     Events = Matter.Events,
     MouseConstraint = Matter.MouseConstraint;
@@ -30,14 +31,27 @@ var engine = Engine.create(document.body, {
     render: render
 
 });
+engine.world.gravity.y = 4;
+var mouse = {
+    x: 0,
+    y: 0,
+    isDown: false
+};
 
 // add a mouse controlled constraint
 var mouseConstraint = MouseConstraint.create(engine);
 
+Events.on(mouseConstraint, 'mouseup', function(event) {
+    mouseUp(event);
+});
+
+Events.on(mouseConstraint, 'mousedown', function(event) {
+    mouseDown(event);
+});
 
 // create ground
-var ground = Bodies.rectangle(395, 600, 815, 50, { isStatic: true, render: { visible: false } }),
-    rockOptions = { density: 0.68, restitution: 1.0 },
+var ground = Bodies.rectangle(395, 600, 815, 50, { isStatic: true, render: { visible: true } }),
+    rockOptions = { density: 1, restitution: 1.0 },
     rock = Bodies.polygon(170, 350, 20, 35, rockOptions),
     anchor = { x: 170, y: 350 },
     elastic = Constraint.create({
@@ -49,12 +63,13 @@ var ground = Bodies.rectangle(395, 600, 815, 50, { isStatic: true, render: { vis
         }
     });
 
-var ball = Matter.Bodies.circle(200, 200, 40);
-
+var ball = Matter.Bodies.circle(200, 200, 40,  { restitution: 0.9, friction: 0.1 });
+var ballStartingX;
+var ballStartingY;
 
 var groupId = Body.nextGroup(),
     particleOptions = { friction: 0.00001, groupId: groupId, render: { visible: false }},
-    cloth = Composites.softBody(650, 100, 5, 5, 8, 5, false, 8, particleOptions);
+    cloth = Composites.softBody(650, 100, 5, 4, 8, 2, false, 8, particleOptions);
 
 for (var i = 0; i < 5; i++) {
     if (i === 0 || i  === 4)  {
@@ -66,7 +81,6 @@ var backboard = Bodies.rectangle(760, 50, 10, 150, { isStatic: true, render: { f
 
 
 // add all of the bodies to the world
-
 World.add(engine.world, [ball, ground, mouseConstraint,  elastic, cloth, backboard, hoop]);
 
 var coolDown = 0
@@ -83,6 +97,58 @@ Events.on(engine, 'tick', function(event) {
 
 // run the engine
 Engine.run(engine);
+
+window.onresize = function() {
+    // onResize(canvas)
+};
+
+function getMousePosition(e) {
+    mouse.x = e.mouse.position.x;
+    mouse.y = e.mouse.position.x;
+
+}
+
+var mouseDown = function(e) {
+        mouse.isDown = true;
+        Body.setPosition(ball, {
+            x:  mouse.x,
+            y:  mouse.y
+        });
+        // Body.setVelocity(ball, {
+        //     x: 10,
+        //     y: 10
+        // });
+        ballStartingX = mouse.x;
+        ballStartingY = mouse.y;
+
+
+}
+var mouseUp = function(e) {
+        mouse.isDown = false;
+        ball.velocity.y = (ballStartingY - ball.position.y) * 0.1;
+        ball.velocity.x = (ballStartingX - ball.position.x) * 0.1;
+}
+
+function getTouchPosition(e) {
+    mouse.x = e.mouse.position.x;
+    mouse.y = e.mouse.position.y;
+}
+
+var touchDown = function(e) {
+    getTouchPosition(e);
+    mouse.isDown = true;
+    ball.position.x = mouse.x;
+    ball.position.y = mouse.y;
+    ballStartingX = mouse.x;
+    ballStartingY = mouse.y;
+
+}
+var touchUp = function(e) {
+    mouse.isDown = false;
+    ball.velocity.y = (ballStartingY - ball.position.y) * 0.1;
+    ball.velocity.x = (ballStartingX - ball.position.x) * 0.1;
+
+}
 
 
 // var frameRate = 0.025;
