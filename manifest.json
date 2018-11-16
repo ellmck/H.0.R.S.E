@@ -8,26 +8,25 @@
   "background_color": "#3E4EB8",
   "theme_color": "#2F3BA2",
    "icons": [{
-  "src": "images/basketball.png",
+  "src": "images/icon128.png",
   "sizes": "128x128",
   "type": "image/png"
   }, {
-  "src": "images/basketball.png",
+  "src": "images/icon144.png",
   "sizes": "144x144",
   "type": "image/png"
   }, {
-  "src": "images/basketball.png",
+  "src": "images/icon152.png",
   "sizes": "152x152",
   "type": "image/png"
   }, {
-  "src": "images/basketball.png",
+  "src": "images/icon192.png",
   "sizes": "192x192",
   "type": "image/png"
   }, {
-  "src": "images/basketball.png",
+  "src": "images/icon256.png",
   "sizes": "256x256",
   "type": "image/png"
   }]
-
 
 }

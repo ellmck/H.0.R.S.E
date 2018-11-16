@@ -4,11 +4,49 @@ html, body {
 }
 
 canvas {
+    background: #727272;
     position: absolute;
-
-    background: #5f5f5f;
     height:100%;
     width:100%;
+}
+
+p {
+    width: 100px;
+    height: 9px;
+    background: red;
+    position: absolute;
+    left: 660px;
+    top: 99px;
+}
+
+div {
+    width: 200px;
+    height: 175px;
+    background: white;
+    position: absolute;
+    left: 50px;
+    top: 50px;
+    font-size: 500%;
+    font-family: "Times New Roman", Times, serif;
+    text-align: center;
+    border-style: solid;
+    border-width: 5px;
+    color: navy;
+}
+
+h1 {
+    width: 185px;
+    height: 50px;
+    position: absolute;
+    left: 59px;
+    top: 145px;
+    color: red;
+    text-align: center;
+    border-style: solid;
+    border-width: 3px;
+    border-color: black;
+    font-family: "Times New Roman", Times, serif;
+
 }
 
 #basket {

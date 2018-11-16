@@ -2,11 +2,13 @@
     <meta charset="UTF-8">
     <meta name="description" content="2 Player Basketball game">
     <meta name="keywords" content="HTML,CSS,XML,JavaScript">
-    <meta name="author" content="John Doe">
+    <meta name="author" content="Elliott McKevitt">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="msapplication-starturl" content="/">
+
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>H.O.R.S.E</title>
     <link rel="manifest" href="manifest.json">
@@ -15,24 +17,30 @@
 </head>
 
 <body>
-    <canvas id="canvas">Your browser does not support this game    </canvas>
+<canvas id="canvas">Your browser does not support this game    </canvas>
+
+<div class = "score"></div>
+<h1 class = "timeclock"></h1>
+<p class = "rectangle"></p>
+
 </body>
-<script src="serviceWorker.js"></script>
-<script src="app.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="libraries/matter.js"></script>
+<!--<script src="serviceWorker.js" type="text/javascript"></script>-->
+<script src="app.js" type="text/javascript"></script>
 
-<script>
-    window.addEventListener('load', async e => {
-        await fetchTrending();
+<!--<script>-->
+    <!--window.addEventListener('load', async e => {-->
 
-        if ('serviceWorker' in navigator) {
-            try {
-                navigator.serviceWorker.register('serviceWorker.js');
-                console.log('SW registered');
+        <!--if ('serviceWorker' in navigator) {-->
+            <!--try {-->
+                <!--navigator.serviceWorker.register('serviceWorker.js');-->
+                <!--console.log('SW registered');-->
 
-            } catch (error) {
-                console.log('SW failed');
+            <!--} catch (error) {-->
+                <!--console.log('SW failed');-->
 
-            }
-        }
-    });
-</script>
+            <!--}-->
+        <!--}-->
+    <!--});-->
+<!--</script>-->
