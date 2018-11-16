@@ -1,9 +1,8 @@
-var hoop = document.getElementsByTagName("p");
-var scoreBoard = document.getElementsByClassName("score");
-scoreBoard[0].innerText = 0;
-
-var canvas = document.getElementById("canvas");
-var context = canvas.getContext("2d");
+var hoop = document.getElementById("hoop"),
+scoreBoard = document.getElementsByClassName("score"),
+arrow = document.getElementById("arrow"),
+canvas = document.getElementById("canvas"),
+context = canvas.getContext("2d");
 
 // Matter.js module aliases
 var Engine = Matter.Engine;
@@ -44,32 +43,85 @@ var mouseConstraint = MouseConstraint.create(engine);
 Events.on(mouseConstraint, 'mouseup', function(event) {
     mouseUp(event);
 });
-
+Events.on(mouseConstraint, 'mousemove', function(event) {
+    mouseMoved(event);
+});
 Events.on(mouseConstraint, 'mousedown', function(event) {
     mouseDown(event);
 });
 
-// create ground
-var ground = Bodies.rectangle(395, 600, 815, 50, { isStatic: true, render: { visible: true } }),
-    rockOptions = { density: 1, restitution: 1.0 },
-    rock = Bodies.polygon(170, 350, 20, 35, rockOptions),
-    anchor = { x: 170, y: 350 },
-    elastic = Constraint.create({
-        pointA: anchor,
-        bodyB: rock,
-        stiffness: 0.05,
-        render: {
-            lineWidth: 0,
-        }
-    });
+var ballNetRatio = 2;
+var ballBackboardRatio = 4.4;
+var backboardOffsetRatio = 0.62;
 
-var ball = Matter.Bodies.circle(200, 200, 40,  { restitution: 0.9, friction: 0.1 });
-var ballStartingX;
-var ballStartingY;
+var ballDimensions = {
+    radius: 35,
+};
+
+var net = {
+    backboard: {
+        x: 0,
+        y: 0,
+        w: 30,
+        h: 0
+    },
+    rightRim: {
+        x: 0,
+        y: 0,
+        w: 8,
+        h: 8
+    },
+    leftRim: {
+        x: 0,
+        y: 0,
+        w: 8,
+        h: 8
+    },
+    backboardConnector: {
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 4
+    }
+};
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+ballDimensions.radius = canvas.width * 0.02;
+net.backboard.h = (ballDimensions.radius * 2) * ballBackboardRatio;
+net.backboard.w = (ballDimensions.radius * 0.6);
+
+net.backboard.x = canvas.width - (canvas.width * 0.15);
+net.backboard.y = (canvas.height * 0.5) - net.backboard.h - ((ballDimensions.radius * 2) * backboardOffsetRatio);
+net.rightRim.x = net.backboard.x - net.rightRim.w - ((ballDimensions.radius * 2) * backboardOffsetRatio);
+net.rightRim.y = net.backboard.y  + ((ballDimensions.radius * 2) * backboardOffsetRatio);
+net.leftRim.x = net.rightRim.x - net.rightRim.w - ((ballDimensions.radius * 2) * ballNetRatio);
+net.leftRim.y = net.rightRim.y;
+net.backboardConnector.x = net.rightRim.x + net.rightRim.w;
+net.backboardConnector.w = net.backboard.x - net.rightRim.x;
+net.backboardConnector.y = net.rightRim.y;
+net.leftRim.y = net.rightRim.y;
+
+hoop.style.left = net.leftRim.x + "px";
+hoop.style.top = (net.leftRim.y - 20) + "px";
+hoop.style.width = net.rightRim - net.leftRim + "px";
+
+var backboard = Bodies.rectangle(net.backboard.x, net.backboard.y, net.backboard.w, net.backboard.h, { isStatic: true, render: { fillStyle: '#6cff7c'} }),
+    backboardConnector = Bodies.rectangle(net.backboardConnector.x, net.backboardConnector.y, net.backboardConnector.w, net.backboardConnector.h, { isStatic: true, render: { fillStyle: '#6cff7c'} }),
+    backboardHoop = Bodies.rectangle(net.leftRim.x, net.leftRim.x, net.rightRim.x - net.leftRim.x, net.backboardConnector.h, { isStatic: true, render: { fillStyle: '#6cff7c'} });
+
+// create game objects
+var ground = Bodies.rectangle(0, canvas.height, canvas.width * 2, 40, { isStatic: true, render: { visible: true } }),
+    rightWall = Bodies.rectangle( canvas.width, 0, 40, canvas.height * 2, { isStatic: true, render: { visible: true } }),
+    garage = Bodies.rectangle( 0, canvas.height, 40, canvas.height * 1.2, { isStatic: true, render: { visible: true } });
+
+var ball = Matter.Bodies.circle(200, 200, ballDimensions.radius,  { density: 1, restitution: 0.9, friction: 0.1, render: { fillStyle: '#ff5f9f' } });
+var ballStartingX = 0;
+var ballStartingY = 0;
 
 var groupId = Body.nextGroup(),
     particleOptions = { friction: 0.00001, groupId: groupId, render: { visible: false }},
-    cloth = Composites.softBody(650, 100, 5, 4, 8, 2, false, 8, particleOptions);
+    cloth = Composites.softBody(net.leftRim.x, net.leftRim.y, 5, 4, 8, 2, false, 8, particleOptions);
 
 for (var i = 0; i < 5; i++) {
     if (i === 0 || i  === 4)  {
@@ -77,20 +129,13 @@ for (var i = 0; i < 5; i++) {
     }
 }
 
-var backboard = Bodies.rectangle(760, 50, 10, 150, { isStatic: true, render: { fillStyle: '#1919FF'} });
-
-
 // add all of the bodies to the world
-World.add(engine.world, [ball, ground, mouseConstraint,  elastic, cloth, backboard, hoop]);
+World.add(engine.world, [ball, ground, rightWall, garage, mouseConstraint, cloth, backboard, backboardConnector, backboardHoop , hoop]);
 
-var coolDown = 0
 
 Events.on(engine, 'tick', function(event) {
-    coolDown += 1
-
-        if (ball.position.x > 624 && ball.position.x < 810 && ball.position.y > 125 && ball.position.y < 135 && coolDown > 2) {
-            scoreBoard[0].innerText = parseInt(scoreBoard[0].innerText) + 2
-            coolDown = 0
+        if (ball.position.x > net.leftRim.x && ball.position.x < net.rightRim.x && ball.position.y > net.rightRim.y && ball.position.y < net.rightRim.y + 10) {
+            scoreBoard[0].innerText = "YEET";
         }
     });
 
@@ -104,29 +149,41 @@ window.onresize = function() {
 
 function getMousePosition(e) {
     mouse.x = e.mouse.position.x;
-    mouse.y = e.mouse.position.x;
+    mouse.y = e.mouse.position.y;
+}
 
+function mouseMoved(e) {
+    if(!mouse.isDown){
+        return;
+    }
+    getMousePosition(e)
+    Body.setPosition(ball, {
+        x:  mouse.x,
+        y:  mouse.y
+    });
 }
 
 var mouseDown = function(e) {
-        mouse.isDown = true;
-        Body.setPosition(ball, {
-            x:  mouse.x,
-            y:  mouse.y
+    Body.setVelocity(ball, {
+        x: 0,
+        y: 0
+    })
+    getMousePosition(e)
+    mouse.isDown = true;
+    ballStartingX = mouse.x;
+    ballStartingY = mouse.y;
+    Body.setPosition(ball, {
+        x:  mouse.x,
+        y:  mouse.y
         });
-        // Body.setVelocity(ball, {
-        //     x: 10,
-        //     y: 10
-        // });
-        ballStartingX = mouse.x;
-        ballStartingY = mouse.y;
-
-
 }
+
 var mouseUp = function(e) {
         mouse.isDown = false;
-        ball.velocity.y = (ballStartingY - ball.position.y) * 0.1;
-        ball.velocity.x = (ballStartingX - ball.position.x) * 0.1;
+    Body.setVelocity(ball, {
+        x: (ballStartingX - ball.position.x) * 0.2,
+        y: (ballStartingY - ball.position.y)* 0.2
+    })
 }
 
 function getTouchPosition(e) {
@@ -150,114 +207,6 @@ var touchUp = function(e) {
 
 }
 
-
-// var frameRate = 0.025;
-// // Seconds
-// var frameDelay = frameRate * 1000;
-// // ms
-// var loopTimer = false;
-//
-// var canvas = document.getElementById("canvas");
-// var context = canvas.getContext("2d");
-//
-// // Matter.js module aliases
-// var Engine = Matter.Engine,
-//     World = Matter.World,
-//     Bodies = Matter.Bodies,
-//     Body = Matter.Body
-//     Constraint = Matter.Constraint,
-//     Composites = Matter.Composites,
-//     Events = Matter.Events,
-//     MouseConstraint = Matter.MouseConstraint;
-//
-// // create engine
-// // create a Matter.js engine
-// var engine = Engine.create(canvas, {
-//     render: {
-//         options: {
-//             wireframes: false,
-//         }
-//     }
-// });
-//
-//
-// var world = engine.world;
-//
-// var ballA = Bodies.circle(380, 100, 40, 10);
-//
-// World.add(engine.world, [ground, mouseConstraint, rock, elastic, cloth, backboard, hoop]);
-//
-// Engine.run(engine);
-// Render.run(render);
-//
-// var ballStartingX;
-// var ballStartingY;
-//
-// var ball = {
-//     position: {
-//         x: canvas.width * 0.5,
-//         y: 0
-//     },
-//     velocity: {
-//         x: 10,
-//         y: 0
-//     },
-//     acceleration: 25,
-//     radius: 35,
-//     // 1px = 1cm
-//     restitution: 0.7,
-//     friction: -0.7
-// };
-//
-// var ballNetRatio = 2;
-// var ballBackboardRatio = 4.4;
-// var backboardOffsetRatio = 0.62;
-//
-// var net = {
-//
-//     backboard: {
-//         x: 0,
-//         y: 0,
-//         w: 30,
-//         h: 0
-//     },
-//     rightRim: {
-//         x: 0,
-//         y: 0,
-//         w: 8,
-//         h: 8
-//     },
-//     leftRim: {
-//         x: 0,
-//         y: 0,
-//         w: 8,
-//         h: 8
-//     },
-//     backboardConnector: {
-//         x: 0,
-//         y: 0,
-//         w: 4,
-//         h: 4
-//     }
-//
-// };
-//
-// var basketballImage = new Image();
-// basketballImage.src = "images/basketball.png";
-// basketballImage.onload = function() {
-//     context.save();
-//     context.globalCompositeOperation = 'source-in';
-//     context.drawImage(basketballImage, 0, 0);
-//     context.restore();
-// }
-// ;
-//
-// var mouse = {
-//     x: 0,
-//     y: 0,
-//     isDown: false
-// };
-//
 // window.onresize = function() {
 //     onResize(canvas)
 // }

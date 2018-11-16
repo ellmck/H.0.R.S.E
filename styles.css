@@ -10,10 +10,19 @@ canvas {
     width:100%;
 }
 
-p {
+#hoop {
     width: 100px;
     height: 9px;
-    background: red;
+    background: #6cff7c;
+    position: absolute;
+    left: 660px;
+    top: 99px;
+}
+
+#arrow {
+    visibility: hidden;
+    width: 5px;
+    color: #ff0007;
     position: absolute;
     left: 660px;
     top: 99px;
