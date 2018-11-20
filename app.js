@@ -147,29 +147,32 @@ var draw = function() {
 			}
 		});
 
+	//prevents ball from flying through objects
+    const extra = 500;
+
 	// create game objects
-	var ground = Bodies.rectangle(0, canvas.height, canvas.width * 2, (ballDimensions.radius * 2), {
+	var ground = Bodies.rectangle(-extra, canvas.height + extra, canvas.width * 2 + extra + extra, (ballDimensions.radius * 2) + extra + extra, {
 			isStatic: true,
 			render: {
 				fillStyle: 'brown',
 				visible: true
 			}
 		}),
-		rightWall = Bodies.rectangle(canvas.width, 0, (ballDimensions.radius * 2), canvas.height * 2, {
+		rightWall = Bodies.rectangle(canvas.width + extra, -extra, (ballDimensions.radius * 2)  + extra + extra, canvas.height * 2  + extra + extra, {
 			isStatic: true,
 			render: {
 				fillStyle: 'black',
 				visible: true
 			}
 		}),
-		garage = Bodies.rectangle(0, canvas.height, (ballDimensions.radius * 2), canvas.height * 1.2, {
+		garage = Bodies.rectangle(-extra, canvas.height + extra, (ballDimensions.radius * 2)  + extra + extra, canvas.height * 1.2  + extra + extra, {
 			isStatic: true,
 			render: {
 				fillStyle: 'grey',
 				visible: true
 			}
 		}),
-		roof = Bodies.rectangle(0 - ballDimensions.radius * 12, 0, (ballDimensions.radius * 2), canvas.height * 1.2, {
+		roof = Bodies.rectangle(-extra - ballDimensions.radius * 12, -extra, (ballDimensions.radius * 2)+ extra + extra, canvas.height * 1.2 + extra + extra, {
 			isStatic: true,
 			render: {
 				fillStyle: 'black',
@@ -178,13 +181,15 @@ var draw = function() {
 		});
 	Body.rotate(roof, -Math.PI / 3);
 
-	var rightRim = Matter.Bodies.circle(net.rightRim.x, net.rightRim.y, 2, {
+	const rimRadius = 4
+
+	var rightRim = Matter.Bodies.circle(net.rightRim.x, net.rightRim.y, rimRadius, {
 			isStatic: true,
 			render: {
 				visible: true
 			}
 		}),
-		leftRim = Matter.Bodies.circle(net.leftRim.x, net.leftRim.y, 2, {
+		leftRim = Matter.Bodies.circle(net.leftRim.x, net.leftRim.y, rimRadius, {
 			isStatic: true,
 			render: {
 				visible: true
