@@ -31,7 +31,7 @@ canvas {
     top: 99px;
 }
 
-div {
+.score {
     width: 20%;
     height: 15%;
     position: absolute;
@@ -41,6 +41,16 @@ div {
     font-family: 'Concert One', cursive;
     text-align: center;
     color: #ff00e5;
+}
+
+.player {
+    position:absolute;
+    bottom:3%;
+    left:40%;
+    font-size: 500%;
+    font-family: 'Concert One', cursive;
+    text-align: center;
+    color: #05ffa6;
 }
 
 #basket {

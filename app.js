@@ -14,10 +14,70 @@ var Engine = Matter.Engine,
 var engine;
 var mouse;
 var canvas = document.getElementById('canvas'),
-	context = canvas.getContext('2d');
+	context = canvas.getContext('2d'),
+	hoop = document.getElementById("hoop"),
+	scoreBoard = document.getElementsByClassName("score"),
+	arrow = document.getElementById("arrow"),
+	playerText = document.getElementsByClassName("player");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+//prevents ball from flying through objects
+const extra = 500;
+
+const ballNetRatio = 1.885;
+const ballBackboardRatio = 3;
+const backboardOffsetRatio = 0.62;
+
+var ballStartingX = 0;
+var ballStartingY = 0;
+
+
+var ballDimensions = {
+	radius: 35,
+};
+
+var net = {
+	backboard: {
+		x: 0,
+		y: 0,
+		w: 30,
+		h: 0
+	},
+	rightRim: {
+		x: 0,
+		y: 0,
+		w: 8,
+		h: 8
+	},
+	leftRim: {
+		x: 0,
+		y: 0,
+		w: 8,
+		h: 8
+	},
+	backboardConnector: {
+		x: 0,
+		y: 0,
+		w: 4,
+		h: 4
+	}
+};
+
+var player_one = {
+	name: "Player 1",
+	score: 0,
+};
+
+var player_two = {
+	name: "Player 2",
+	score: 0,
+};
+
+var player_current = player_one;
+
+const horse = ["H",".O",".R",".S","E"];
 
 var draw = function() {
 
@@ -63,9 +123,6 @@ var draw = function() {
 		y: 0,
 		isDown: false
 	};
-	var hoop = document.getElementById("hoop"),
-		scoreBoard = document.getElementsByClassName("score"),
-		arrow = document.getElementById("arrow");
 
 
 	// add a mouse controlled constraint
@@ -82,40 +139,7 @@ var draw = function() {
 	});
 
 
-	const ballNetRatio = 1.885;
-	const ballBackboardRatio = 3;
-	const backboardOffsetRatio = 0.62;
 
-	var ballDimensions = {
-		radius: 35,
-	};
-
-	var net = {
-		backboard: {
-			x: 0,
-			y: 0,
-			w: 30,
-			h: 0
-		},
-		rightRim: {
-			x: 0,
-			y: 0,
-			w: 8,
-			h: 8
-		},
-		leftRim: {
-			x: 0,
-			y: 0,
-			w: 8,
-			h: 8
-		},
-		backboardConnector: {
-			x: 0,
-			y: 0,
-			w: 4,
-			h: 4
-		}
-	};
 
 	ballDimensions.radius = canvas.width * 0.02;
 	net.backboard.h = (ballDimensions.radius * 2) * ballBackboardRatio;
@@ -146,9 +170,6 @@ var draw = function() {
 				fillStyle: backboardColor
 			}
 		});
-
-	//prevents ball from flying through objects
-    const extra = 500;
 
 	// create game objects
 	var ground = Bodies.rectangle(-extra, canvas.height + extra, canvas.width * 2 + extra + extra, (ballDimensions.radius * 2) + extra + extra, {
@@ -196,7 +217,7 @@ var draw = function() {
 			}
 		});
 
-	var ball = Matter.Bodies.circle(200, 200, ballDimensions.radius, {
+	var ball = Matter.Bodies.circle(net.backboardConnector.x , net.backboardConnector.y - ballDimensions.radius, ballDimensions.radius, {
 		density: 1,
 		restitution: 0.9,
 		friction: 0.1,
@@ -204,8 +225,8 @@ var draw = function() {
 			fillStyle: '#08c4ff'
 		}
 	});
-	var ballStartingX = 0;
-	var ballStartingY = 0;
+
+
 
 
 	var leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
@@ -233,13 +254,18 @@ var draw = function() {
 
 
 	Events.on(engine, 'tick', function(event) {
-		if (ball.position.x > net.leftRim.x && ball.position.x < net.rightRim.x && ball.position.y > net.rightRim.y && ball.position.y < net.rightRim.y + 10) {
+
+
+		if (ball.velocity.y > 0 && ball.position.x > net.leftRim.x && ball.position.x < net.rightRim.x && ball.position.y > net.rightRim.y - 20 && ball.position.y < net.rightRim.y + 20) {
 			scoreBoard[0].innerText = "YEET";
-		} else if (ball.position.y >= ground.position.y - ballDimensions.radius * 2 &&
+			resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
+
+		} else if (ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
 			scoreBoard[0].innerText === "") {
 			scoreBoard[0].innerText = "MISS";
-		}
+			resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
 
+		}
 	});
 
 
@@ -271,7 +297,7 @@ var draw = function() {
 		Body.setVelocity(ball, {
 			x: 0,
 			y: 0
-		})
+		});
 		getMousePosition(e);
 		mouse.isDown = true;
 		ballStartingX = mouse.x;
@@ -302,40 +328,71 @@ var draw = function() {
 		})
 	}
 
-	function getTouchPosition(e) {
-		mouse.x = e.mouse.position.x;
-		mouse.y = e.mouse.position.y;
+	function resetForNextPlayer(ball, x, y, scored) {
+
+		player_current = player_current === player_one ? player_two : player_one;
+		playerText[0].innerText = player_current.name;
+		console.log(scored);
+		if (scored) {
+			setStatic(ball, true);
+			Body.setPosition(ball, {
+			x: x,
+			y: y });
+		}
+		else{
+			playerText[0].innerText = player_current.name + " " + horse[player_current.score];
+			player_current.score++;
+		}
+
+		$(".player").animateCss('bounce');
+
+
 	}
 
-	var touchDown = function(e) {
-		getTouchPosition(e);
-		mouse.isDown = true;
-		ball.position.x = mouse.x;
-		ball.position.y = mouse.y;
-		ballStartingX = mouse.x;
-		ballStartingY = mouse.y;
 
+	function setStatic(object, setStatic) {
+
+		object.isStatic = setStatic;
 	}
-	var touchUp = function(e) {
-		mouse.isDown = false;
-		ball.velocity.y = (ballStartingY - ball.position.y) * 0.1;
-		ball.velocity.x = (ballStartingX - ball.position.x) * 0.1;
 
+	// Draw the slingshot arrow
+	function drawArrow(context, startX, startY, endX, endY) {
+		context.strokeStyle="#6cff7c";
+		context.lineWidth=2;
+		context.beginPath();
+		context.moveTo(startX, startY);
+		context.lineTo(endX, endY);
+		context.stroke();
 	}
 }
 
-function setStatic(object, setStatic) {
-
-	object.isStatic = setStatic;
-}
-
-// Draw the slingshot arrow
-function drawArrow(context, startX, startY, endX, endY) {
-	context.strokeStyle="#6cff7c";
-	context.lineWidth=2;
-	context.beginPath();
-	context.moveTo(startX, startY);
-	context.lineTo(endX, endY);
-	context.stroke();
-}
 draw();
+
+
+//used to call animate.css
+$.fn.extend({
+	animateCss: function(animationName, callback) {
+		var animationEnd = (function(el) {
+			var animations = {
+				animation: 'animationend',
+				OAnimation: 'oAnimationEnd',
+				MozAnimation: 'mozAnimationEnd',
+				WebkitAnimation: 'webkitAnimationEnd',
+			};
+
+			for (var t in animations) {
+				if (el.style[t] !== undefined) {
+					return animations[t];
+				}
+			}
+		})(document.createElement('div'));
+
+		this.addClass('animated ' + animationName).one(animationEnd, function() {
+			$(this).removeClass('animated ' + animationName);
+
+			if (typeof callback === 'function') callback();
+		});
+
+		return this;
+	},
+});
