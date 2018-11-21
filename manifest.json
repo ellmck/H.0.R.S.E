@@ -2,7 +2,7 @@
   "name": "H.O.R.S.E Basketball Game",
   "short_name": "H.O.R.S.E",
   "lang": "en-UK",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "landscape",
   "start_url": "/index.html",
   "background_color": "#3E4EB8",
