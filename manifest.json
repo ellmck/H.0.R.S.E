@@ -14,8 +14,7 @@
   "display": "standalone",
   "orientation": "landscape",
   "start_url": "/index.html",
-  "background_color": "black",
-  "theme_color": "black"
-
+  "background_color": "#ffbacd",
+  "theme_color": "#ffbacd"
 
 }

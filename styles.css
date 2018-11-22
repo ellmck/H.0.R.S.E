@@ -35,21 +35,31 @@ canvas {
     width: 20%;
     height: 15%;
     position: absolute;
-    left: 5%;
+    left: 50%;
     top: 5%;
-    font-size: 500%;
+    font-size: 5em;
     font-family: 'Concert One', cursive;
     text-align: center;
     color: #ff00e5;
 }
 
-.player {
+.playerOne {
     position:absolute;
     bottom:3%;
-    left:40%;
-    font-size: 500%;
+    left:10%;
+    font-size: 2em;
     font-family: 'Concert One', cursive;
-    text-align: center;
+    text-align: left;
+    color: #05ffa6;
+}
+
+.playerTwo {
+    position:absolute;
+    bottom:3%;
+    left:50%;
+    font-size: 2em;
+    font-family: 'Concert One', cursive;
+    text-align: left;
     color: #05ffa6;
 }
 
