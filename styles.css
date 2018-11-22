@@ -37,7 +37,7 @@ canvas {
     position: absolute;
     left: 50%;
     top: 5%;
-    font-size: 5em;
+    font-size: 4em;
     font-family: 'Concert One', cursive;
     text-align: center;
     color: #ff00e5;
@@ -45,7 +45,7 @@ canvas {
 
 .playerOne {
     position:absolute;
-    bottom:3%;
+    bottom:5%;
     left:10%;
     font-size: 2em;
     font-family: 'Concert One', cursive;
@@ -55,7 +55,7 @@ canvas {
 
 .playerTwo {
     position:absolute;
-    bottom:3%;
+    bottom:5%;
     left:50%;
     font-size: 2em;
     font-family: 'Concert One', cursive;
