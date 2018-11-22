@@ -258,21 +258,25 @@ var draw = function() {
             ball.position.x < net.rightRim.x &&
             ball.position.y > net.rightRim.y - 20 &&
             ball.position.y < net.rightRim.y + 20) {
-            scoreBoard[0].innerText = "YEET!";
 
-            player_current.scored = true;
+            scoreBoard[0].innerText = "YEET!";
+			ballInMotion = false;
+
             setTimeout(function() {
-                resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
+
+				resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
             }, 2000);
 
         } else if (ballInMotion &&
             ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
             scoreBoard[0].innerText === "") {
 
-            player_current.scored = false;
-            scoreBoard[0].innerText = "Gutter Ball";
-            setTimeout(function() {
-                resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
+        	scoreBoard[0].innerText = "Gutter Ball";
+			ballInMotion = false;
+
+			setTimeout(function() {
+
+				resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
             }, 2000);
 
         }
@@ -305,24 +309,23 @@ var draw = function() {
         if (ballInMotion) {
             return;
         }
-
-        Body.setVelocity(ball, {
+		mouse.isDown = true;
+		Body.setVelocity(ball, {
             x: 0,
             y: 0
         });
 
         getMousePosition(e);
-        mouse.isDown = true;
-
+        console.log(player_current.canMoveBall);
         if (player_current.canMoveBall) {
             ballStartingX = mouse.x;
             ballStartingY = mouse.y;
-
+		}
             Body.setPosition(ball, {
                 x: mouse.x,
                 y: mouse.y
             });
-        }
+
         setStatic(ball, true);
 
     }
@@ -331,53 +334,57 @@ var draw = function() {
         if (ballInMotion) {
             return;
         }
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        var xVelocity = (ballStartingX - ball.position.x) * 0.2;
-        var yVelocity = (ballStartingY - ball.position.y) * 0.2;
+		mouse.isDown = false;
+		context.clearRect(0, 0, canvas.width, canvas.height);
+        var xVelocity = (ballStartingX - ball.position.x) * 0.25;
+        var yVelocity = (ballStartingY - ball.position.y) * 0.25;
 
         if (Math.abs(xVelocity) < 2 && Math.abs(yVelocity) < 2) {
-            return;
+			return;
         }
-
         ballInMotion = true;
-        mouse.isDown = false;
         setStatic(ball, false);
         Body.setVelocity(ball, {
-            x: (ballStartingX - ball.position.x) * 0.2,
-            y: (ballStartingY - ball.position.y) * 0.2
+            x: xVelocity,
+            y: yVelocity
         })
     }
 
     function resetForNextPlayer(ball, x, y, scored) {
 
-        if (player_current.score === horse.length) {
+		player_current.scored  = scored;
+
+		var player_other = player_current === player_one ? player_two : player_one;
+
+        if (player_current.score === horse.length || player_other.score === horse.length) {
             location.reload();
             return;
         }
 
-        scoreBoard[0].innerText = "";
-        ballInMotion = false;
-
-        var previousPlayerScored = player_current.scored;
-
+		scoreBoard[0].innerText = "";
         player_current.text[0].style.borderStyle = "hidden";
 
-        if (scored) {
+        if (scored && !player_other.scored) {
             setStatic(ball, true);
             Body.setPosition(ball, {
                 x: x,
                 y: y
             });
-        } else {
+			player_current.canMoveBall = true;
+			player_other.canMoveBall = false;
+
+
+		} else if (!scored && player_other.scored){
             player_current.score++;
-        }
+			player_other.canMoveBall = true;
+			player_current.canMoveBall = false;
+		}
 
         player_current.text[0].innerText = player_current.name + " " + horse[player_current.score];
 
-        player_current = player_current === player_one ? player_two : player_one;
-        player_current.canMoveBall = !previousPlayerScored;
+		//change player
+		player_current = player_current === player_one ? player_two : player_one;
         player_current.text[0].style.borderStyle = "solid";
-
     }
 
     function setStatic(object, setStatic) {
