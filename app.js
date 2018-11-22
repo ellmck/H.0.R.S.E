@@ -432,3 +432,12 @@ $.fn.extend({
         return this;
     },
 });
+
+
+
+//Code below is for button and shot selection
+
+$( "#confirm" ).click(function() {
+	var allButtons = document.getElementsByClassName("button-container");
+	allButtons[0].style.display = "none";
+});
