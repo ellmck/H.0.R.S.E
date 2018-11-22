@@ -434,10 +434,38 @@ $.fn.extend({
 });
 
 
-
 //Code below is for button and shot selection
 
+var confirm = document.getElementById("confirm"),
+	skyShot = document.getElementById("skyShot"),
+	blindShot = document.getElementById("blindShot"),
+	garagShot = document.getElementById("garagShot"),
+	swish = document.getElementById("swish"),
+	roofShot = document.getElementById("roofShot"),
+	allButtons = document.getElementsByClassName("button-container");
+
+function buttonSelected(button){
+	button.style.background='green';
+}
+
+
 $( "#confirm" ).click(function() {
-	var allButtons = document.getElementsByClassName("button-container");
+	buttonSelected(confirm);
 	allButtons[0].style.display = "none";
 });
+$( "#skyShot" ).click(function() {
+	buttonSelected(skyShot);
+});
+$( "#blindShot" ).click(function() {
+	buttonSelected(blindShot);
+});
+$( "#garagShot" ).click(function() {
+	buttonSelected(garagShot);
+});
+$( "#swish" ).click(function() {
+	buttonSelected(swish);
+});
+$( "#roofShot" ).click(function() {
+	buttonSelected(roofShot);
+});
+
