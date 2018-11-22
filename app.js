@@ -10,16 +10,15 @@ const Engine = Matter.Engine,
     Events = Matter.Events,
     MouseConstraint = Matter.MouseConstraint;
 
-
 var engine;
 var mouse;
 var canvas = document.getElementById('canvas'),
-	context = canvas.getContext('2d'),
-	hoop = document.getElementById("hoop"),
-	scoreBoard = document.getElementsByClassName("score"),
-	arrow = document.getElementById("arrow"),
-	playerOneText = document.getElementsByClassName("playerOne"),
-	playerTwoText = document.getElementsByClassName("playerTwo");
+    context = canvas.getContext('2d'),
+    hoop = document.getElementById("hoop"),
+    scoreBoard = document.getElementsByClassName("score"),
+    arrow = document.getElementById("arrow"),
+    playerOneText = document.getElementsByClassName("playerOne"),
+    playerTwoText = document.getElementsByClassName("playerTwo");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -34,56 +33,58 @@ const backboardOffsetRatio = 0.62;
 var ballStartingX = 0;
 var ballStartingY = 0;
 
-
 const ballDimensions = {
-	radius: 35,
+    radius: 35,
 };
 
 var net = {
-	backboard: {
-		x: 0,
-		y: 0,
-		w: 0,
-		h: 0
-	},
-	rightRim: {
-		x: 0,
-		y: 0,
-		w: 0,
-		h: 0
-	},
-	leftRim: {
-		x: 0,
-		y: 0,
-		w: 0,
-		h: 0
-	},
-	backboardConnector: {
-		x: 0,
-		y: 0,
-		w: 0,
-		h: 0
-	}
+    backboard: {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0
+    },
+    rightRim: {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0
+    },
+    leftRim: {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0
+    },
+    backboardConnector: {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0
+    }
 };
 
 var player_one = {
-	name: "Player 1",
-	score: 0,
-	text: playerOneText
+    name: "Player 1",
+    score: 0,
+    text: playerOneText,
+    scored: false,
+    canMoveBall: true
 };
 
 var player_two = {
-	name: "Player 2",
-	score: 0,
-	text: playerTwoText
+    name: "Player 2",
+    score: 0,
+    text: playerTwoText,
+    scored: false,
+    canMoveBall: true
 };
 
 var player_current = player_one;
 
-const horse = ["", "H","H.O","H.O.R","H.O.R.S","H.O.R.S.E"];
+const horse = ["", "H", "H.O", "H.O.R", "H.O.R.S", "H.O.R.S.E"];
 
 var ballInMotion = false;
-
 
 var draw = function() {
 
@@ -130,20 +131,18 @@ var draw = function() {
         isDown: false
     };
 
-
     // add a mouse controlled constraint
     var mouseConstraint = MouseConstraint.create(engine);
 
-    Events.on(mouseConstraint, 'mouseup', function (event) {
+    Events.on(mouseConstraint, 'mouseup', function(event) {
         mouseUp(event);
     });
-    Events.on(mouseConstraint, 'mousemove', function (event) {
+    Events.on(mouseConstraint, 'mousemove', function(event) {
         mouseMoved(event);
     });
-    Events.on(mouseConstraint, 'mousedown', function (event) {
+    Events.on(mouseConstraint, 'mousedown', function(event) {
         mouseDown(event);
     });
-
 
     ballDimensions.radius = canvas.width * 0.02;
     net.backboard.h = (ballDimensions.radius * 2) * ballBackboardRatio;
@@ -230,18 +229,16 @@ var draw = function() {
         }
     });
 
-
-    var leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function (x, y) {
+    var leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
         return Bodies.rectangle(x, y, 6, 6);
     });
 
-    var rightBoxes = Composites.stack(net.rightRim.x, net.rightRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function (x, y) {
+    var rightBoxes = Composites.stack(net.rightRim.x, net.rightRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
         return Bodies.rectangle(x, y, 6, 6);
     });
 
     leftBoxes.bodies[0].isStatic = true;
     rightBoxes.bodies[0].isStatic = true;
-
 
     var leftChain = Composites.chain(leftBoxes, 0, 0, -0.5, 0, {
         stiffness: 1
@@ -250,29 +247,36 @@ var draw = function() {
         stiffness: 1
     });
 
-
     // add all of the bodies to the world
     World.add(engine.world, [ball, ground, rightWall, garage, roof, mouseConstraint, leftChain, rightChain, backboard, backboardConnector, leftRim, rightRim]);
 
+    Events.on(engine, 'tick', function(event) {
 
-    Events.on(engine, 'tick', function (event) {
+        if (ballInMotion &&
+            ball.velocity.y > 0 &&
+            ball.position.x > net.leftRim.x &&
+            ball.position.x < net.rightRim.x &&
+            ball.position.y > net.rightRim.y - 20 &&
+            ball.position.y < net.rightRim.y + 20) {
+            scoreBoard[0].innerText = "YEET!";
 
+            player_current.scored = true;
+            setTimeout(function() {
+                resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
+            }, 2000);
 
-        if (ball.velocity.y > 0 && ball.position.x > net.leftRim.x && ball.position.x < net.rightRim.x && ball.position.y > net.rightRim.y - 20 && ball.position.y < net.rightRim.y + 20) {
-            scoreBoard[0].innerText = "YEET";
-
-            setTimeout(function() { resetForNextPlayer(ball, ballStartingX, ballStartingY, true); },2000);
-
-        } else if (ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
+        } else if (ballInMotion &&
+            ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
             scoreBoard[0].innerText === "") {
 
-            scoreBoard[0].innerText = "MISS";
-            setTimeout(function() { resetForNextPlayer(ball, ballStartingX, ballStartingY, false); },2000);
-
+            player_current.scored = false;
+            scoreBoard[0].innerText = "Gutter Ball";
+            setTimeout(function() {
+                resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
+            }, 2000);
 
         }
     });
-
 
     // run the engine
     Engine.run(engine);
@@ -298,28 +302,33 @@ var draw = function() {
     }
 
     function mouseDown(e) {
-    	if(ballInMotion){
-    		return;
-		}
-        scoreBoard[0].innerText = "";
+        if (ballInMotion) {
+            return;
+        }
+
         Body.setVelocity(ball, {
             x: 0,
             y: 0
         });
+
         getMousePosition(e);
         mouse.isDown = true;
-        ballStartingX = mouse.x;
-        ballStartingY = mouse.y;
-        Body.setPosition(ball, {
-            x: mouse.x,
-            y: mouse.y
-        });
+
+        if (player_current.canMoveBall) {
+            ballStartingX = mouse.x;
+            ballStartingY = mouse.y;
+
+            Body.setPosition(ball, {
+                x: mouse.x,
+                y: mouse.y
+            });
+        }
         setStatic(ball, true);
 
     }
 
     function mouseUp(e) {
-        if(ballInMotion){
+        if (ballInMotion) {
             return;
         }
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -341,9 +350,17 @@ var draw = function() {
 
     function resetForNextPlayer(ball, x, y, scored) {
 
+        if (player_current.score === horse.length) {
+            location.reload();
+            return;
+        }
+
         scoreBoard[0].innerText = "";
         ballInMotion = false;
-        player_current = player_current === player_one ? player_two : player_one;
+
+        var previousPlayerScored = player_current.scored;
+
+        player_current.text[0].style.borderStyle = "hidden";
 
         if (scored) {
             setStatic(ball, true);
@@ -351,22 +368,17 @@ var draw = function() {
                 x: x,
                 y: y
             });
-        }
-        else {
-        	player_current.score++;
+        } else {
+            player_current.score++;
         }
 
         player_current.text[0].innerText = player_current.name + " " + horse[player_current.score];
 
-        if (player_current.score === horse.length)
-		{
-			location.reload();
-		}
-        $(".player").animateCss('bounce');
-
+        player_current = player_current === player_one ? player_two : player_one;
+        player_current.canMoveBall = !previousPlayerScored;
+        player_current.text[0].style.borderStyle = "solid";
 
     }
-
 
     function setStatic(object, setStatic) {
 
@@ -386,31 +398,30 @@ var draw = function() {
 
 draw();
 
-
 //used to call animate.css
 $.fn.extend({
-	animateCss: function(animationName, callback) {
-		var animationEnd = (function(el) {
-			var animations = {
-				animation: 'animationend',
-				OAnimation: 'oAnimationEnd',
-				MozAnimation: 'mozAnimationEnd',
-				WebkitAnimation: 'webkitAnimationEnd',
-			};
+    animateCss: function(animationName, callback) {
+        var animationEnd = (function(el) {
+            var animations = {
+                animation: 'animationend',
+                OAnimation: 'oAnimationEnd',
+                MozAnimation: 'mozAnimationEnd',
+                WebkitAnimation: 'webkitAnimationEnd',
+            };
 
-			for (var t in animations) {
-				if (el.style[t] !== undefined) {
-					return animations[t];
-				}
-			}
-		})(document.createElement('div'));
+            for (var t in animations) {
+                if (el.style[t] !== undefined) {
+                    return animations[t];
+                }
+            }
+        })(document.createElement('div'));
 
-		this.addClass('animated ' + animationName).one(animationEnd, function() {
-			$(this).removeClass('animated ' + animationName);
+        this.addClass('animated ' + animationName).one(animationEnd, function() {
+            $(this).removeClass('animated ' + animationName);
 
-			if (typeof callback === 'function') callback();
-		});
+            if (typeof callback === 'function') callback();
+        });
 
-		return this;
-	},
+        return this;
+    },
 });
