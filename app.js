@@ -23,6 +23,95 @@ var canvas = document.getElementById('canvas'),
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+//Code below is for button and shot selection
+
+var confirm = document.getElementById("confirm"),
+	allButtons = document.getElementsByClassName("button-container");
+
+var skyShot = {
+    name: "Sky",
+    button: document.getElementById("skyShot"),
+    selected: false,
+    complete: false
+}
+
+var blindShot = {
+    name: "Blind",
+    button: document.getElementById("blindShot"),
+    selected: false,
+    complete: false
+}
+
+var garagShot = {
+    name: "Garage",
+    button: document.getElementById("garagShot"),
+    selected: false,
+    complete: false
+}
+
+var swish = {
+    name: "Swish",
+    button: document.getElementById("swish"),
+    selected: false,
+    complete: false
+}
+
+var roofShot = {
+    name: "Roof",
+    button: document.getElementById("roofShot"),
+    selected: false,
+    complete: false
+}
+
+var shotTypes = [skyShot, blindShot, garagShot, swish, roofShot];
+
+function buttonSelected(shot){
+    if(shot.selected){
+        shot.selected = false;
+        shot.button.style.background='#5500FF';
+    }
+    else {
+        shot.selected = true;
+        shot.button.style.background = 'green';
+    }
+}
+
+$( "#confirm" ).click(function() {
+    var shotText = " Shot";
+    var numberSelected = 0;
+    shotTypes.forEach(function (arrayItem) {
+        if (arrayItem.selected){
+            shotText = " " + arrayItem.name + shotText;
+            numberSelected++;
+        }
+    });
+    shotText = numberSelected > 0 ? shotText : "Normal Shot";
+    $("#shotType").text(shotText)
+
+    allButtons[0].style.display = "none";
+
+});
+
+
+$( "#skyShot" ).click(function() {
+	buttonSelected(skyShot);
+});
+$( "#blindShot" ).click(function() {
+	buttonSelected(blindShot);
+});
+$( "#garagShot" ).click(function() {
+	buttonSelected(garagShot);
+});
+$( "#swish" ).click(function() {
+	buttonSelected(swish);
+});
+$( "#roofShot" ).click(function() {
+	buttonSelected(roofShot);
+});
+
+
+//code below is for game physics
+
 //prevents ball from flying through objects
 const extra = 500;
 
@@ -178,8 +267,7 @@ var draw = function() {
     var ground = Bodies.rectangle(-extra, canvas.height + extra, canvas.width * 2 + extra + extra, (ballDimensions.radius * 2) + extra + extra, {
             isStatic: true,
             render: {
-                fillStyle: 'brown',
-                visible: true
+                visible: false
             }
         }),
         rightWall = Bodies.rectangle(canvas.width + extra, -extra, (ballDimensions.radius * 2) + extra + extra, canvas.height * 2 + extra + extra, {
@@ -259,9 +347,9 @@ var draw = function() {
             ball.position.y > net.rightRim.y - 20 &&
             ball.position.y < net.rightRim.y + 20) {
 
-            scoreBoard[0].innerText = "YEET!";
 			ballInMotion = false;
-
+            scoreBoard[0].innerText = "YEET!";
+			
             setTimeout(function() {
 
 				resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
@@ -270,9 +358,9 @@ var draw = function() {
         } else if (ballInMotion &&
             ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
             scoreBoard[0].innerText === "") {
-
-        	scoreBoard[0].innerText = "Gutter Ball";
+			
 			ballInMotion = false;
+        	scoreBoard[0].innerText = "Gutter Ball";
 
 			setTimeout(function() {
 
@@ -316,7 +404,6 @@ var draw = function() {
         });
 
         getMousePosition(e);
-        console.log(player_current.canMoveBall);
         if (player_current.canMoveBall) {
             ballStartingX = mouse.x;
             ballStartingY = mouse.y;
@@ -362,7 +449,7 @@ var draw = function() {
         }
 
 		scoreBoard[0].innerText = "";
-        player_current.text[0].style.borderStyle = "hidden";
+        player_current.text[0].style.borderBottom = "3px hidden #CCC";
 
         if (scored && !player_other.scored) {
             setStatic(ball, true);
@@ -378,13 +465,18 @@ var draw = function() {
             player_current.score++;
 			player_other.canMoveBall = true;
 			player_current.canMoveBall = false;
+			
+			//show shot selection
+			allButtons[0].style.display = "grid";
+
 		}
 
         player_current.text[0].innerText = player_current.name + " " + horse[player_current.score];
 
 		//change player
 		player_current = player_current === player_one ? player_two : player_one;
-        player_current.text[0].style.borderStyle = "solid";
+        player_current.text[0].style.borderBottom = "3px solid #CCC";
+		
     }
 
     function setStatic(object, setStatic) {
@@ -434,38 +526,4 @@ $.fn.extend({
 });
 
 
-//Code below is for button and shot selection
-
-var confirm = document.getElementById("confirm"),
-	skyShot = document.getElementById("skyShot"),
-	blindShot = document.getElementById("blindShot"),
-	garagShot = document.getElementById("garagShot"),
-	swish = document.getElementById("swish"),
-	roofShot = document.getElementById("roofShot"),
-	allButtons = document.getElementsByClassName("button-container");
-
-function buttonSelected(button){
-	button.style.background='green';
-}
-
-
-$( "#confirm" ).click(function() {
-	buttonSelected(confirm);
-	allButtons[0].style.display = "none";
-});
-$( "#skyShot" ).click(function() {
-	buttonSelected(skyShot);
-});
-$( "#blindShot" ).click(function() {
-	buttonSelected(blindShot);
-});
-$( "#garagShot" ).click(function() {
-	buttonSelected(garagShot);
-});
-$( "#swish" ).click(function() {
-	buttonSelected(swish);
-});
-$( "#roofShot" ).click(function() {
-	buttonSelected(roofShot);
-});
 
