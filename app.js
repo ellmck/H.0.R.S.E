@@ -361,7 +361,7 @@ var draw = function() {
 			skyShot.complete = true;
 		}
 		
-		bounceShot.complete = (numberOfBouncesAllowed >= 0);
+		bounceShot.complete = (numberOfBouncesAllowed === 0);
 		
         if ((ballInMotion &&
             ball.velocity.y > 0 &&
@@ -449,7 +449,7 @@ var draw = function() {
     }
 
     function mouseUp(e) {
-        if (ballInMotion) {
+        if (!mouse.isDown || ballInMotion) {
             return;
         }
 		mouse.isDown = false;
