@@ -13,6 +13,17 @@ canvas {
     position: absolute;
 }
 
+#blindShotOverlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%; 
+	height: 100%;
+	background: black;
+	opacity: 0; 
+	z-index: 0;
+	}
+
 .scenery-container {
     z-index: 1;
     position: absolute;

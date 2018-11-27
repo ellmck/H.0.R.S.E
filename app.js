@@ -17,9 +17,10 @@ var canvas = document.getElementById('canvas'),
     hoop = document.getElementById("hoop"),
     scoreBoard = document.getElementsByClassName("score"),
     arrow = document.getElementById("arrow"),
+	blindShotOverlay = document.getElementById("blindShotOverlay"),
     playerOneText = document.getElementsByClassName("playerOne"),
     playerTwoText = document.getElementsByClassName("playerTwo");
-
+	
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -38,6 +39,13 @@ var skyShot = {
 var blindShot = {
     name: "Blind",
     button: document.getElementById("blindShot"),
+    selected: false,
+    complete: false
+}
+
+var bounceShot = {
+    name: "Bounce",
+    button: document.getElementById("bounceShot"),
     selected: false,
     complete: false
 }
@@ -63,7 +71,9 @@ var roofShot = {
     complete: false
 }
 
-var shotTypes = [skyShot, blindShot, garagShot, swish, roofShot];
+var shotTypes = [skyShot, blindShot, bounceShot, garagShot, swish, roofShot];
+
+var numberOfBouncesAllowed = 0;
 
 function buttonSelected(shot){
     if(shot.selected){
@@ -84,7 +94,10 @@ $( "#confirm" ).click(function() {
             shotText = " " + arrayItem.name + shotText;
             numberSelected++;
         }
+		arrayItem.complete = false;
     });
+	
+	numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
     shotText = numberSelected > 0 ? shotText : "Normal Shot";
     $("#shotType").text(shotText)
 
@@ -98,6 +111,9 @@ $( "#skyShot" ).click(function() {
 });
 $( "#blindShot" ).click(function() {
 	buttonSelected(blindShot);
+});
+$( "#bounceShot" ).click(function() {
+	buttonSelected(bounceShot);
 });
 $( "#garagShot" ).click(function() {
 	buttonSelected(garagShot);
@@ -174,6 +190,7 @@ var player_current = player_one;
 const horse = ["", "H", "H.O", "H.O.R", "H.O.R.S", "H.O.R.S.E"];
 
 var ballInMotion = false;
+
 
 var draw = function() {
 
@@ -340,18 +357,21 @@ var draw = function() {
 
     Events.on(engine, 'tick', function(event) {
 
-        if (ballInMotion &&
+		if (skyShot.selected && ball.position.y < 0){
+			skyShot.complete = true;
+		}
+		
+		bounceShot.complete = (numberOfBouncesAllowed >= 0);
+		
+        if ((ballInMotion &&
             ball.velocity.y > 0 &&
             ball.position.x > net.leftRim.x &&
             ball.position.x < net.rightRim.x &&
-            ball.position.y > net.rightRim.y - 20 &&
-            ball.position.y < net.rightRim.y + 20) {
+            ball.position.y > net.rightRim.y - 10 &&
+            ball.position.y < net.rightRim.y + 30) && isScored()) {
 
-			ballInMotion = false;
             scoreBoard[0].innerText = "YEET!";
-			
-            setTimeout(function() {
-
+			setTimeout(function() {
 				resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
             }, 2000);
 
@@ -359,20 +379,25 @@ var draw = function() {
             ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
             scoreBoard[0].innerText === "") {
 			
-			ballInMotion = false;
-        	scoreBoard[0].innerText = "Gutter Ball";
-
-			setTimeout(function() {
-
-				resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
-            }, 2000);
-
+			numberOfBouncesAllowed--;
+			
+			if(numberOfBouncesAllowed < 0){
+				
+				scoreBoard[0].innerText = "Gutter Ball";
+				setTimeout(function() {
+					resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
+				}, 2000);
+			}
         }
+		
+		
     });
 
     // run the engine
     Engine.run(engine);
 
+	var opacityLevel = 0;
+	
     function getMousePosition(e) {
         mouse.x = e.mouse.position.x;
         mouse.y = e.mouse.position.y;
@@ -382,6 +407,12 @@ var draw = function() {
         if (!mouse.isDown || ballInMotion) {
             return;
         }
+		
+		if(blindShot.selected){
+			blindShotOverlay.style.zIndex = "99";
+			opacityLevel+=0.1;
+			blindShotOverlay.style.opacity = opacityLevel.toString();
+		}
         getMousePosition(e);
         Body.setPosition(ball, {
             x: mouse.x,
@@ -422,6 +453,9 @@ var draw = function() {
             return;
         }
 		mouse.isDown = false;
+		blindShotOverlay.style.zIndex = "0";
+		blindShotOverlay.style.opacity = 0;
+		opacityLevel = 0;
 		context.clearRect(0, 0, canvas.width, canvas.height);
         var xVelocity = (ballStartingX - ball.position.x) * 0.25;
         var yVelocity = (ballStartingY - ball.position.y) * 0.25;
@@ -437,8 +471,10 @@ var draw = function() {
         })
     }
 
-    function resetForNextPlayer(ball, x, y, scored) {
 
+    function resetForNextPlayer(ball, x, y, scored) {
+		
+		ballInMotion = false;
 		player_current.scored  = scored;
 
 		var player_other = player_current === player_one ? player_two : player_one;
@@ -480,7 +516,6 @@ var draw = function() {
     }
 
     function setStatic(object, setStatic) {
-
         object.isStatic = setStatic;
     }
 
@@ -497,6 +532,19 @@ var draw = function() {
 
 draw();
 
+
+//checks that all selected shots have been completed
+function isScored(){
+	var scored = true;
+	shotTypes.forEach(function (arrayItem) {
+		if (arrayItem.selected && !arrayItem.complete){
+			scored = false;
+		}
+	});
+	return scored;
+}
+	
+	
 //used to call animate.css
 $.fn.extend({
     animateCss: function(animationName, callback) {
