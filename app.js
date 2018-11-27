@@ -20,7 +20,7 @@ let canvas = document.getElementById('canvas'),
 	blindShotOverlay = document.getElementById("blindShotOverlay"),
     playerOneText = document.getElementsByClassName("playerOne"),
     playerTwoText = document.getElementsByClassName("playerTwo");
-	
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -50,9 +50,9 @@ let bounceShot = {
     complete: false
 };
 
-let garagShot = {
+let garageShot = {
     name: "Garage",
-    button: document.getElementById("garagShot"),
+    button: document.getElementById("garageShot"),
     selected: false,
     complete: false
 };
@@ -61,7 +61,7 @@ let swish = {
     name: "Swish",
     button: document.getElementById("swish"),
     selected: false,
-    complete: false
+    complete: true
 };
 
 let roofShot = {
@@ -71,7 +71,7 @@ let roofShot = {
     complete: false
 };
 
-let shotTypes = [skyShot, blindShot, bounceShot, garagShot, swish, roofShot];
+let shotTypes = [skyShot, blindShot, bounceShot, garageShot, swish, roofShot];
 
 let numberOfBouncesAllowed = 0;
 
@@ -99,6 +99,8 @@ $( "#confirm" ).click(function() {
 
     //blindShot will always be true
     blindShot.complete = true;
+    //swish is true until rim is hit
+    swish.complete = true;
 	numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
     shotText = numberSelected > 0 ? shotText : "Normal Shot";
     $("#shotType").text(shotText);
@@ -117,8 +119,8 @@ $( "#blindShot" ).click(function() {
 $( "#bounceShot" ).click(function() {
 	buttonSelected(bounceShot);
 });
-$( "#garagShot" ).click(function() {
-	buttonSelected(garagShot);
+$( "#garageShot" ).click(function() {
+	buttonSelected(garageShot);
 });
 $( "#swish" ).click(function() {
 	buttonSelected(swish);
@@ -292,42 +294,42 @@ let draw = function() {
         rightWall = Bodies.rectangle(canvas.width + extra, -extra, (ballDimensions.radius * 2) + extra + extra, canvas.height * 2 + extra + extra, {
             isStatic: true,
             render: {
-                fillStyle: 'black',
+                fillStyle: 'grey',
                 visible: true
             }
         }),
-        garage = Bodies.rectangle(-extra, canvas.height + extra, (ballDimensions.radius * 2) + extra + extra, canvas.height * 1.2 + extra + extra, {
+        garage = Bodies.rectangle(-extra, canvas.height + extra, (ballDimensions.radius * 2) + extra + extra, canvas.height * 10 + extra + extra, {
             isStatic: true,
             render: {
                 fillStyle: 'grey',
                 visible: true
             }
         }),
-        roof = Bodies.rectangle(-extra - ballDimensions.radius * 12, -extra, (ballDimensions.radius * 2) + extra + extra, canvas.height * 1.2 + extra + extra, {
+        roof = Bodies.rectangle(0 - canvas.height , -100, canvas.height * 1.2 + extra,(ballDimensions.radius * 10) , {
             isStatic: true,
             render: {
                 fillStyle: 'black',
                 visible: true
             }
         });
-    Body.rotate(roof, -Math.PI / 3);
+		Body.rotate(roof, Math.PI / 5);
 
     const rimRadius = 4;
 
-    let rightRim = Matter.Bodies.circle(net.rightRim.x, net.rightRim.y, rimRadius, {
+    let rightRim = Bodies.circle(net.rightRim.x, net.rightRim.y, rimRadius, {
             isStatic: true,
             render: {
                 visible: true
             }
         }),
-        leftRim = Matter.Bodies.circle(net.leftRim.x, net.leftRim.y, rimRadius, {
+        leftRim = Bodies.circle(net.leftRim.x, net.leftRim.y, rimRadius, {
             isStatic: true,
             render: {
                 visible: true
             }
         });
 
-    let ball = Matter.Bodies.circle(net.backboardConnector.x, net.backboardConnector.y - ballDimensions.radius, ballDimensions.radius, {
+    let ball = Bodies.circle(net.backboardConnector.x, net.backboardConnector.y - ballDimensions.radius, ballDimensions.radius, {
         density: 1,
         restitution: 0.9,
         friction: 0.1,
@@ -355,16 +357,25 @@ let draw = function() {
     });
 
     // add all of the bodies to the world
-    World.add(engine.world, [ball, ground, rightWall, garage, roof, mouseConstraint, leftChain, rightChain, backboard, backboardConnector, leftRim, rightRim]);
+    World.add(engine.world, [ball, ground, rightWall, garage, mouseConstraint, leftChain, rightChain, backboard, backboardConnector, leftRim, rightRim]);
 
     Events.on(engine, 'tick', function(event) {
 
 		if (skyShot.selected && ball.position.y < 0){
 			skyShot.complete = true;
 		}
-		
-		bounceShot.complete = (numberOfBouncesAllowed === 0);
-		
+
+        if (Matter.SAT.collides(ball, garage).collided) {
+            garageShot.complete = true;
+        }
+        if (Matter.SAT.collides(ball, leftRim).collided ||
+            Matter.SAT.collides(ball, rightRim).collided) {
+            swish.complete = false;
+        }
+
+
+        bounceShot.complete = (numberOfBouncesAllowed === 0);
+
         if ((ballInMotion &&
             ball.velocity.y > 0 &&
             ball.position.x > net.leftRim.x &&
@@ -380,26 +391,26 @@ let draw = function() {
         } else if (ballInMotion &&
             ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
             scoreBoard[0].innerText === "") {
-			
+
 			numberOfBouncesAllowed--;
-			
+
 			if(numberOfBouncesAllowed < 0){
-				
+
 				scoreBoard[0].innerText = "Gutter Ball";
 				setTimeout(function() {
 					resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
 				}, 2000);
 			}
         }
-		
-		
+
+
     });
 
     // run the engine
     Engine.run(engine);
 
 	let opacityLevel = 0;
-	
+
     function getMousePosition(e) {
         mouse.x = e.mouse.position.x;
         mouse.y = e.mouse.position.y;
@@ -409,7 +420,7 @@ let draw = function() {
         if (!mouse.isDown || ballInMotion) {
             return;
         }
-		
+
 		if(blindShot.selected){
 			blindShotOverlay.style.zIndex = "99";
 			opacityLevel+=0.1;
@@ -475,7 +486,7 @@ let draw = function() {
 
 
     function resetForNextPlayer(ball, x, y, scored) {
-		
+
 		ballInMotion = false;
 		player_current.scored  = scored;
 
@@ -505,7 +516,7 @@ let draw = function() {
             player_current.score++;
 			player_other.canMoveBall = true;
 			player_current.canMoveBall = false;
-			
+
 			//show shot selection
 			allButtons[0].style.display = "grid";
 
@@ -516,7 +527,7 @@ let draw = function() {
 		//change player
 		player_current = player_current === player_one ? player_two : player_one;
         player_current.text[0].style.borderBottom = "3px solid #CCC";
-		
+
     }
 
     function setStatic(object, setStatic) {
@@ -547,8 +558,8 @@ function isScored(){
 	});
 	return scored;
 }
-	
-	
+
+
 //used to call animate.css
 $.fn.extend({
     animateCss: function(animationName, callback) {
