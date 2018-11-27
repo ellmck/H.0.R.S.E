@@ -477,7 +477,9 @@ var draw = function() {
 		ballInMotion = false;
 		player_current.scored  = scored;
 
-		var player_other = player_current === player_one ? player_two : player_one;
+        numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
+
+        var player_other = player_current === player_one ? player_two : player_one;
 
         if (player_current.score === horse.length || player_other.score === horse.length) {
             location.reload();
