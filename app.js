@@ -86,7 +86,9 @@ function buttonSelected(shot){
     }
 }
 
-$( "#confirm" ).click(function() {
+$( "#confirm" ).click(function(event) {
+    event.preventDefault();
+
     let shotText = " Shot";
     let numberSelected = 0;
     shotTypes.forEach(function (arrayItem) {
@@ -110,22 +112,28 @@ $( "#confirm" ).click(function() {
 });
 
 
-$( "#skyShot" ).click(function() {
+$( "#skyShot" ).click(function(event) {
+    event.preventDefault();
 	buttonSelected(skyShot);
 });
-$( "#blindShot" ).click(function() {
+$( "#blindShot" ).click(function(event) {
+    event.preventDefault();
 	buttonSelected(blindShot);
 });
-$( "#bounceShot" ).click(function() {
+$( "#bounceShot" ).click(function(event) {
+    event.preventDefault();
 	buttonSelected(bounceShot);
 });
-$( "#garageShot" ).click(function() {
+$( "#garageShot" ).click(function(event) {
+    event.preventDefault();
 	buttonSelected(garageShot);
 });
-$( "#swish" ).click(function() {
+$( "#swish" ).click(function(event) {
+    event.preventDefault();
 	buttonSelected(swish);
 });
-$( "#roofShot" ).click(function() {
+$( "#roofShot" ).click(function(event) {
+    event.preventDefault();
 	buttonSelected(roofShot);
 });
 
@@ -291,7 +299,7 @@ let draw = function() {
                 visible: false
             }
         }),
-        rightWall = Bodies.rectangle(canvas.width + extra, -extra, (ballDimensions.radius * 2) + extra + extra, canvas.height * 2 + extra + extra, {
+        rightWall = Bodies.rectangle(canvas.width + extra, -extra,  extra + extra, canvas.height * 2 + extra + extra, {
             isStatic: true,
             render: {
                 fillStyle: 'grey',
@@ -383,7 +391,9 @@ let draw = function() {
             ball.position.y > net.rightRim.y - 10 &&
             ball.position.y < net.rightRim.y + 30) && isScored()) {
 
+            ballInMotion = false;
             scoreBoard[0].innerText = "YEET!";
+
 			setTimeout(function() {
 				resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
             }, 2000);
@@ -392,7 +402,8 @@ let draw = function() {
             ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
             scoreBoard[0].innerText === "") {
 
-			numberOfBouncesAllowed--;
+            ballInMotion = false;
+            numberOfBouncesAllowed--;
 
 			if(numberOfBouncesAllowed < 0){
 
@@ -487,7 +498,6 @@ let draw = function() {
 
     function resetForNextPlayer(ball, x, y, scored) {
 
-		ballInMotion = false;
 		player_current.scored  = scored;
 
         numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
@@ -520,7 +530,12 @@ let draw = function() {
 			//show shot selection
 			allButtons[0].style.display = "grid";
 
-		}
+		} else if (!scored && !player_other.scored){
+        player_other.canMoveBall = true;
+        player_current.canMoveBall = false;
+        //show shot selection
+        allButtons[0].style.display = "grid";
+    }
 
         player_current.text[0].innerText = player_current.name + " " + horse[player_current.score];
 
