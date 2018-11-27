@@ -10,9 +10,9 @@ const Engine = Matter.Engine,
     Events = Matter.Events,
     MouseConstraint = Matter.MouseConstraint;
 
-var engine;
-var mouse;
-var canvas = document.getElementById('canvas'),
+let engine;
+let mouse;
+let canvas = document.getElementById('canvas'),
     context = canvas.getContext('2d'),
     hoop = document.getElementById("hoop"),
     scoreBoard = document.getElementsByClassName("score"),
@@ -26,54 +26,54 @@ canvas.height = window.innerHeight;
 
 //Code below is for button and shot selection
 
-var confirm = document.getElementById("confirm"),
+let confirm = document.getElementById("confirm"),
 	allButtons = document.getElementsByClassName("button-container");
 
-var skyShot = {
+let skyShot = {
     name: "Sky",
     button: document.getElementById("skyShot"),
     selected: false,
     complete: false
-}
+};
 
-var blindShot = {
+let blindShot = {
     name: "Blind",
     button: document.getElementById("blindShot"),
     selected: false,
-    complete: false
-}
+    complete: true
+};
 
-var bounceShot = {
+let bounceShot = {
     name: "Bounce",
     button: document.getElementById("bounceShot"),
     selected: false,
     complete: false
-}
+};
 
-var garagShot = {
+let garagShot = {
     name: "Garage",
     button: document.getElementById("garagShot"),
     selected: false,
     complete: false
-}
+};
 
-var swish = {
+let swish = {
     name: "Swish",
     button: document.getElementById("swish"),
     selected: false,
     complete: false
-}
+};
 
-var roofShot = {
+let roofShot = {
     name: "Roof",
     button: document.getElementById("roofShot"),
     selected: false,
     complete: false
-}
+};
 
-var shotTypes = [skyShot, blindShot, bounceShot, garagShot, swish, roofShot];
+let shotTypes = [skyShot, blindShot, bounceShot, garagShot, swish, roofShot];
 
-var numberOfBouncesAllowed = 0;
+let numberOfBouncesAllowed = 0;
 
 function buttonSelected(shot){
     if(shot.selected){
@@ -87,8 +87,8 @@ function buttonSelected(shot){
 }
 
 $( "#confirm" ).click(function() {
-    var shotText = " Shot";
-    var numberSelected = 0;
+    let shotText = " Shot";
+    let numberSelected = 0;
     shotTypes.forEach(function (arrayItem) {
         if (arrayItem.selected){
             shotText = " " + arrayItem.name + shotText;
@@ -96,10 +96,12 @@ $( "#confirm" ).click(function() {
         }
 		arrayItem.complete = false;
     });
-	
+
+    //blindShot will always be true
+    blindShot.complete = true;
 	numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
     shotText = numberSelected > 0 ? shotText : "Normal Shot";
-    $("#shotType").text(shotText)
+    $("#shotType").text(shotText);
 
     allButtons[0].style.display = "none";
 
@@ -135,14 +137,14 @@ const ballNetRatio = 1.885;
 const ballBackboardRatio = 3;
 const backboardOffsetRatio = 0.62;
 
-var ballStartingX = 0;
-var ballStartingY = 0;
+let ballStartingX = 0;
+let ballStartingY = 0;
 
 const ballDimensions = {
     radius: 35,
 };
 
-var net = {
+let net = {
     backboard: {
         x: 0,
         y: 0,
@@ -169,7 +171,7 @@ var net = {
     }
 };
 
-var player_one = {
+let player_one = {
     name: "Player 1",
     score: 0,
     text: playerOneText,
@@ -177,7 +179,7 @@ var player_one = {
     canMoveBall: true
 };
 
-var player_two = {
+let player_two = {
     name: "Player 2",
     score: 0,
     text: playerTwoText,
@@ -185,16 +187,16 @@ var player_two = {
     canMoveBall: true
 };
 
-var player_current = player_one;
+let player_current = player_one;
 
 const horse = ["", "H", "H.O", "H.O.R", "H.O.R.S", "H.O.R.S.E"];
 
-var ballInMotion = false;
+let ballInMotion = false;
 
 
-var draw = function() {
+let draw = function() {
 
-    var render = Render.create({
+    let render = Render.create({
         element: document.body,
         engine: engine,
         options: {
@@ -238,7 +240,7 @@ var draw = function() {
     };
 
     // add a mouse controlled constraint
-    var mouseConstraint = MouseConstraint.create(engine);
+    let mouseConstraint = MouseConstraint.create(engine);
 
     Events.on(mouseConstraint, 'mouseup', function(event) {
         mouseUp(event);
@@ -264,9 +266,9 @@ var draw = function() {
     net.backboardConnector.y = net.rightRim.y;
     net.backboardConnector.h = (ballDimensions.radius * 0.25);
 
-    var backboardColor = "#000000";
+    let backboardColor = "#000000";
 
-    var backboard = Bodies.rectangle(net.backboard.x, net.backboard.y, net.backboard.w, net.backboard.h, {
+    let backboard = Bodies.rectangle(net.backboard.x, net.backboard.y, net.backboard.w, net.backboard.h, {
             isStatic: true,
 
             render: {
@@ -281,7 +283,7 @@ var draw = function() {
         });
 
     // create game objects
-    var ground = Bodies.rectangle(-extra, canvas.height + extra, canvas.width * 2 + extra + extra, (ballDimensions.radius * 2) + extra + extra, {
+    let ground = Bodies.rectangle(-extra, canvas.height + extra, canvas.width * 2 + extra + extra, (ballDimensions.radius * 2) + extra + extra, {
             isStatic: true,
             render: {
                 visible: false
@@ -310,9 +312,9 @@ var draw = function() {
         });
     Body.rotate(roof, -Math.PI / 3);
 
-    const rimRadius = 4
+    const rimRadius = 4;
 
-    var rightRim = Matter.Bodies.circle(net.rightRim.x, net.rightRim.y, rimRadius, {
+    let rightRim = Matter.Bodies.circle(net.rightRim.x, net.rightRim.y, rimRadius, {
             isStatic: true,
             render: {
                 visible: true
@@ -325,7 +327,7 @@ var draw = function() {
             }
         });
 
-    var ball = Matter.Bodies.circle(net.backboardConnector.x, net.backboardConnector.y - ballDimensions.radius, ballDimensions.radius, {
+    let ball = Matter.Bodies.circle(net.backboardConnector.x, net.backboardConnector.y - ballDimensions.radius, ballDimensions.radius, {
         density: 1,
         restitution: 0.9,
         friction: 0.1,
@@ -334,21 +336,21 @@ var draw = function() {
         }
     });
 
-    var leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
+    let leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
         return Bodies.rectangle(x, y, 6, 6);
     });
 
-    var rightBoxes = Composites.stack(net.rightRim.x, net.rightRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
+    let rightBoxes = Composites.stack(net.rightRim.x, net.rightRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
         return Bodies.rectangle(x, y, 6, 6);
     });
 
     leftBoxes.bodies[0].isStatic = true;
     rightBoxes.bodies[0].isStatic = true;
 
-    var leftChain = Composites.chain(leftBoxes, 0, 0, -0.5, 0, {
+    let leftChain = Composites.chain(leftBoxes, 0, 0, -0.5, 0, {
         stiffness: 1
     });
-    var rightChain = Composites.chain(rightBoxes, 0, 0, -0.5, 0, {
+    let rightChain = Composites.chain(rightBoxes, 0, 0, -0.5, 0, {
         stiffness: 1
     });
 
@@ -396,7 +398,7 @@ var draw = function() {
     // run the engine
     Engine.run(engine);
 
-	var opacityLevel = 0;
+	let opacityLevel = 0;
 	
     function getMousePosition(e) {
         mouse.x = e.mouse.position.x;
@@ -457,8 +459,8 @@ var draw = function() {
 		blindShotOverlay.style.opacity = 0;
 		opacityLevel = 0;
 		context.clearRect(0, 0, canvas.width, canvas.height);
-        var xVelocity = (ballStartingX - ball.position.x) * 0.25;
-        var yVelocity = (ballStartingY - ball.position.y) * 0.25;
+        let xVelocity = (ballStartingX - ball.position.x) * 0.25;
+        let yVelocity = (ballStartingY - ball.position.y) * 0.25;
 
         if (Math.abs(xVelocity) < 2 && Math.abs(yVelocity) < 2) {
 			return;
@@ -479,7 +481,7 @@ var draw = function() {
 
         numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
 
-        var player_other = player_current === player_one ? player_two : player_one;
+        let player_other = player_current === player_one ? player_two : player_one;
 
         if (player_current.score === horse.length || player_other.score === horse.length) {
             location.reload();
@@ -537,7 +539,7 @@ draw();
 
 //checks that all selected shots have been completed
 function isScored(){
-	var scored = true;
+	let scored = true;
 	shotTypes.forEach(function (arrayItem) {
 		if (arrayItem.selected && !arrayItem.complete){
 			scored = false;
@@ -550,15 +552,15 @@ function isScored(){
 //used to call animate.css
 $.fn.extend({
     animateCss: function(animationName, callback) {
-        var animationEnd = (function(el) {
-            var animations = {
+        let animationEnd = (function(el) {
+            let animations = {
                 animation: 'animationend',
                 OAnimation: 'oAnimationEnd',
                 MozAnimation: 'mozAnimationEnd',
                 WebkitAnimation: 'webkitAnimationEnd',
             };
 
-            for (var t in animations) {
+            for (let t in animations) {
                 if (el.style[t] !== undefined) {
                     return animations[t];
                 }
