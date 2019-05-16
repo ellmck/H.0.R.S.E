@@ -345,7 +345,9 @@ let draw = function() {
         friction: 0.1,
 		render: {
 			sprite: {
-				texture: 'assets/sprites/ball.png'
+				texture: 'assets/sprites/ball.png',
+				xScale: ballDimensions.radius * 2 / 68,
+				yScale: ballDimensions.radius * 2 / 68
 			}
         }
     });
