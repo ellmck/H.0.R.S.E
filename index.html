@@ -24,15 +24,6 @@
 <canvas id="canvas">
     Your browser does not support this game
 </canvas>
-    <div id="sky"></div>
-    <div id="sun_yellow"></div>
-    <div id="sun_red"></div>
-    <div id="clouds"></div>
-    <div id="ground"></div>
-    <div id="night"></div>
-    <div id="stars"></div>
-    <div id="sstar"></div>
-    <div id="moon"></div>
 <div class="button-container">
         <button id="skyShot">Sky Shot</button>
         <button id="blindShot">Blind</button>
@@ -43,7 +34,7 @@
         <button id="confirm">Confirm!</button>
 </div>
     <div id="shotType">Normal Shot</div>
-    <div class="score"></div>
+    <div id="score"></div>
     <div id="arrow"></div>
     <div class="playerOne">Player 1</div>
     <div class="playerTwo">Player 2</div>
@@ -52,28 +43,7 @@
 <script src="libraries/matter.min.js"></script>
 <script src="libraries/jquery.color.js" type="text/javascript"></script>
 <script src="serviceWorker.js" type="text/javascript"></script>
-<script src="app.min.js" type="text/javascript"></script>
-<script type="text/javascript">
-    // $(function() {
-    //     $('#sun_yellow').animate({'top':'96%','opacity':0.4}, 12000,function(){
-    //         $('#stars').animate({'opacity':1}, 5000,function(){
-    //             $('#moon').animate({'top':'30%','opacity':1}, 5000, function(){
-    //                 $('#sstar').animate({'opacity':1}, 300);
-    //                 $('#sstar').animate({
-    //                     'backgroundPosition':'0px 0px','top':'15%', 'opacity':0
-    //                 }, 500,function(){
-    //                     // $('#title').animate({'opacity':1}, 1000);
-    //                     // $('#back').animate({'opacity':1}, 3000);
-    //                 });
-    //             });
-    //         });
-    //     });
-    //     $('#sun_red').animate({'top':'96%','opacity':0.8}, 12000);
-    //     $('#sky').animate({'backgroundColor':'#4F0030'}, 18000);
-    //     $('#clouds').animate({'backgroundPosition':'1000px 0px','opacity':0}, 30000);
-    //     $('#night').animate({'opacity':0.8}, 20000);
-    // });
-</script>
+<script src="app.js" type="text/javascript"></script>
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {

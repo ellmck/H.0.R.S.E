@@ -15,7 +15,7 @@ let mouse;
 let canvas = document.getElementById('canvas'),
     context = canvas.getContext('2d'),
     hoop = document.getElementById("hoop"),
-    scoreBoard = document.getElementsByClassName("score"),
+    scoreBoard = document.getElementById("score"),
     arrow = document.getElementById("arrow"),
 	blindShotOverlay = document.getElementById("blindShotOverlay"),
     playerOneText = document.getElementsByClassName("playerOne"),
@@ -24,8 +24,8 @@ let canvas = document.getElementById('canvas'),
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-//Code below is for button and shot selection
 
+//Code below is for button and shot selection
 let confirm = document.getElementById("confirm"),
 	allButtons = document.getElementsByClassName("button-container");
 
@@ -73,7 +73,7 @@ let roofShot = {
 
 let shotTypes = [skyShot, blindShot, bounceShot, garageShot, swish, roofShot];
 
-let numberOfBouncesAllowed = 0;
+let numberOfBouncesLeft = 1;
 
 function buttonSelected(shot){
     if(shot.selected){
@@ -103,7 +103,7 @@ $( "#confirm" ).click(function(event) {
     blindShot.complete = true;
     //swish is true until rim is hit
     swish.complete = true;
-	numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
+	numberOfBouncesLeft = bounceShot.selected ? 1 : 0;
     shotText = numberSelected > 0 ? shotText : "Normal Shot";
     $("#shotType").text(shotText);
 
@@ -262,6 +262,8 @@ let draw = function() {
         mouseDown(event);
     });
 
+
+    //basketball net object
     ballDimensions.radius = canvas.width * 0.02;
     net.backboard.h = (ballDimensions.radius * 2) * ballBackboardRatio;
     net.backboard.w = (ballDimensions.radius * 0.4);
@@ -274,9 +276,9 @@ let draw = function() {
     net.backboardConnector.w = net.rightRim.x - net.backboard.x;
     net.backboardConnector.x = net.rightRim.x - (net.backboardConnector.w * 0.5);
     net.backboardConnector.y = net.rightRim.y;
-    net.backboardConnector.h = (ballDimensions.radius * 0.25);
+    net.backboardConnector.h = (ballDimensions.radius * 0.15);
 
-    let backboardColor = "#000000";
+    let backboardColor = "#7b0500";
 
     let backboard = Bodies.rectangle(net.backboard.x, net.backboard.y, net.backboard.w, net.backboard.h, {
             isStatic: true,
@@ -296,7 +298,7 @@ let draw = function() {
     let ground = Bodies.rectangle(-extra, canvas.height + extra, canvas.width * 2 + extra + extra, (ballDimensions.radius * 2) + extra + extra, {
             isStatic: true,
             render: {
-                visible: false
+                visible: true
             }
         }),
         rightWall = Bodies.rectangle(canvas.width + extra, -extra,  extra + extra, canvas.height * 2 + extra + extra, {
@@ -341,31 +343,33 @@ let draw = function() {
         density: 1,
         restitution: 0.9,
         friction: 0.1,
-        render: {
-            fillStyle: '#08c4ff'
+		render: {
+			sprite: {
+				texture: 'assets/sprites/ball.png'
+			}
         }
     });
 
-    let leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
-        return Bodies.rectangle(x, y, 6, 6);
-    });
-
-    let rightBoxes = Composites.stack(net.rightRim.x, net.rightRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
-        return Bodies.rectangle(x, y, 6, 6);
-    });
-
-    leftBoxes.bodies[0].isStatic = true;
-    rightBoxes.bodies[0].isStatic = true;
-
-    let leftChain = Composites.chain(leftBoxes, 0, 0, -0.5, 0, {
-        stiffness: 1
-    });
-    let rightChain = Composites.chain(rightBoxes, 0, 0, -0.5, 0, {
-        stiffness: 1
-    });
+    // let leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
+    //     return Bodies.rectangle(x, y, 6, 6);
+    // });
+	//
+    // let rightBoxes = Composites.stack(net.rightRim.x, net.rightRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
+    //     return Bodies.rectangle(x, y, 6, 6);
+    // });
+	//
+    // leftBoxes.bodies[0].isStatic = true;
+    // rightBoxes.bodies[0].isStatic = true;
+	//
+    // let leftChain = Composites.chain(leftBoxes, 0, 0, -0.5, 0, {
+    //     stiffness: 1
+    // });
+    // let rightChain = Composites.chain(rightBoxes, 0, 0, -0.5, 0, {
+    //     stiffness: 1
+    // });
 
     // add all of the bodies to the world
-    World.add(engine.world, [ball, ground, rightWall, garage, mouseConstraint, leftChain, rightChain, backboard, backboardConnector, leftRim, rightRim]);
+    World.add(engine.world, [ball, ground, rightWall, garage, mouseConstraint, backboard, backboardConnector, leftRim, rightRim]);
 
     Events.on(engine, 'tick', function(event) {
 
@@ -377,12 +381,19 @@ let draw = function() {
             garageShot.complete = true;
         }
         if (Matter.SAT.collides(ball, leftRim).collided ||
-            Matter.SAT.collides(ball, rightRim).collided) {
+            Matter.SAT.collides(ball, rightRim).collided ||
+			Matter.SAT.collides(ball, backboard).collided) {
             swish.complete = false;
         }
 
+		var ballHitGround = Matter.SAT.collides(ball, ground).collided && ballInMotion;
 
-        bounceShot.complete = (numberOfBouncesAllowed === 0);
+		if (ballHitGround){
+			console.log(numberOfBouncesLeft);
+			numberOfBouncesLeft--;
+		}
+        bounceShot.complete = (numberOfBouncesLeft <= 0);
+
 
         if ((ballInMotion &&
             ball.velocity.y > 0 &&
@@ -392,26 +403,23 @@ let draw = function() {
             ball.position.y < net.rightRim.y + 30) && isScored()) {
 
             ballInMotion = false;
-            scoreBoard[0].innerText = "YEET!";
+            scoreBoard.innerText = "YEET!";
 
 			setTimeout(function() {
 				resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
             }, 2000);
 
-        } else if (ballInMotion &&
-            ball.position.y + extra >= ground.position.y - ballDimensions.radius * 2 &&
-            scoreBoard[0].innerText === "") {
+        } else if (ballHitGround &&
+            scoreBoard.innerText === "" &&
+			numberOfBouncesLeft < 0) {
 
             ballInMotion = false;
-            numberOfBouncesAllowed--;
 
-			if(numberOfBouncesAllowed < 0){
+			scoreBoard.innerText = "Gutter Ball";
+			setTimeout(function() {
+				resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
+			}, 2000);
 
-				scoreBoard[0].innerText = "Gutter Ball";
-				setTimeout(function() {
-					resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
-				}, 2000);
-			}
         }
 
 
@@ -433,9 +441,12 @@ let draw = function() {
         }
 
 		if(blindShot.selected){
-			blindShotOverlay.style.zIndex = "99";
-			opacityLevel+=0.1;
-			blindShotOverlay.style.opacity = opacityLevel.toString();
+			var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i)
+			if (isMobile) {
+				opacityLevel += 0.1;
+				blindShotOverlay.style.zIndex = "99";
+				blindShotOverlay.style.opacity = opacityLevel.toString();
+			}
 		}
         getMousePosition(e);
         Body.setPosition(ball, {
@@ -500,7 +511,7 @@ let draw = function() {
 
 		player_current.scored  = scored;
 
-        numberOfBouncesAllowed = bounceShot.selected ? 1 : 0;
+        numberOfBouncesLeft = bounceShot.selected ? 1 : 0;
 
         let player_other = player_current === player_one ? player_two : player_one;
 
@@ -509,7 +520,7 @@ let draw = function() {
             return;
         }
 
-		scoreBoard[0].innerText = "";
+		scoreBoard.innerText = "";
         player_current.text[0].style.borderBottom = "3px hidden #CCC";
 
         if (scored && !player_other.scored) {

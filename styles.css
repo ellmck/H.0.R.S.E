@@ -3,14 +3,17 @@ html, body {
     height: 100%;
     margin: 0;
     overflow: hidden;
-    /*background: linear-gradient(to bottom, #163C52 0%,#4F4F47 30%,#C5752D 60%,#B7490F 80%, #2F1107 100%);*/
+    background: linear-gradient(to bottom, #154c61 0%, #3498db  30%,#5dade2  60%, #aed6f1  80%, #d6eaf8  100%);
 
 }
-
-canvas {
-    z-index: 4;
-    bottom: 0;
+canvas{
+    margin:0;
+    padding:0;
     position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 #blindShotOverlay {
@@ -24,11 +27,7 @@ canvas {
 	z-index: 0;
 	}
 
-.scenery-container {
-    z-index: 1;
-    position: absolute;
 
-}
 .button-container {
     z-index: 5;
     position: absolute;
@@ -45,6 +44,7 @@ button {
     font-size: 1.5em;
     text-transform: uppercase;
     padding: 7px 20px;
+    margin: 15px;
     width: 90%;
     border-radius: 10px;
     color: white;
@@ -54,39 +54,25 @@ button {
     background: hsl(260, 100%, 50%);
     cursor: pointer;
     outline: 0 !important;
-
-    animation: pulse 1s infinite alternate;
-    transition: background 0.4s, border 0.2s, margin 0.2s;
 }
 button:hover {
     background: hsla(220, 100%, 60%, 1);
-    margin-top: -1px;
-    animation: none;
 }
 button:active {
     border-bottom-width: 0;
-    margin-top: 5px;
-}
-@keyframes pulse {
-    0% {
-        margin-top: 1%;
-    }
-    100% {
-        margin-top: 3%;
-    }
 }
 
 
 #shotType {
     position: absolute;
     z-index: 2;
-    margin: 2%;
-    font-size: 1em;
+    margin: 5%;
+    font-size: 2em;
     font-family: 'Concert One', cursive;
-    color: grey;
+    color: white;
 }
 
-.score {
+#score {
     position: absolute;
     z-index: 2;
     width: 20%;
@@ -97,7 +83,7 @@ button:active {
     font-size: 4em;
     font-family: 'Concert One', cursive;
     text-align: center;
-    color: #ff00e5;
+    color: #bebebe;
 }
 
 .playerOne {
@@ -108,8 +94,8 @@ button:active {
     font-size: 2em;
     font-family: 'Concert One', cursive;
     text-align: left;
-    color: #05ffa6;
-    border-bottom: 3px solid #CCC;
+    color: #000000;
+    border-bottom: 3px solid #000000;
 }
 
 .playerTwo {
@@ -120,84 +106,8 @@ button:active {
     font-size: 2em;
     font-family: 'Concert One', cursive;
     text-align: left;
-    color: #05ffa6;
-    border-bottom: 3px hidden #CCC;
+    color: #000000;
+    border-bottom: 3px hidden #000000;
 
 }
 
-#clouds, #sky, #night, #stars{
-    z-index:1;
-    position:absolute;
-    top:0px;
-    left:0px;
-    right:0px;
-    bottom:0px;
-    width:100%;
-}
-#sky{
-    background:#fff url(images/sky.png) repeat-x top left;
-}
-#sun_yellow{
-    position:absolute;
-    left:45%;
-    top:50%;
-    width:10%;
-    background:transparent url(images/sun.png) no-repeat center center;
-    z-index:2;
-}
-#sun_red{
-    position:absolute;
-    left:45%;
-    top:50%;
-    width:10%;
-    background:transparent url(images/sun2.png) no-repeat center center;
-    z-index:500;
-    opacity:0;
-    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);
-}
-#clouds{
-    background:transparent url(images/clouds.png) repeat-x top left;
-    z-index:2;
-}
-#ground{
-    position:absolute;
-    left:0px;
-    right:0px;
-    bottom:0px;
-	height: 100%;
-    width:100%;
-    background:transparent url(images/ground.png) repeat-x bottom center;
-    z-index:2;
-}
-#night{
-    background-color:#000;
-    z-index:4;
-    opacity:0;
-    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);
-}
-#stars{
-    bottom:30%;
-    background:transparent url(images/stars.png) repeat bottom center;
-    opacity:0;
-    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);
-}
-#sstar{
-    position:absolute;
-    left:40%;
-    top:10%;
-    width:8%;
-    background:transparent url(images/shootingstar.png) no-repeat 80px -200px;
-    z-index:5;
-    opacity:0;
-    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);
-}
-#moon{
-    position:absolute;
-    left:45%;
-    top:60%;
-    width:10%;
-    background:transparent url(images/moon.png) no-repeat center center;
-    z-index:6;
-    opacity:0;
-    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);
-}
