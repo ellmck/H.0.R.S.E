@@ -89,7 +89,7 @@ button:active {
 .playerOne {
     z-index: 2;
     position:absolute;
-    bottom:7%;
+    bottom:10%;
     left:10%;
     font-size: 2em;
     font-family: 'Concert One', cursive;
@@ -101,7 +101,7 @@ button:active {
 .playerTwo {
     z-index: 2;
     position:absolute;
-    bottom:7%;
+    bottom:10%;
     left:50%;
     font-size: 2em;
     font-family: 'Concert One', cursive;

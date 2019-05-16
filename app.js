@@ -523,7 +523,7 @@ let draw = function() {
         }
 
 		scoreBoard.innerText = "";
-        player_current.text[0].style.borderBottom = "3px hidden #CCC";
+        player_current.text[0].style.borderBottom = "3px hidden #000000";
 
         if (scored && !player_other.scored) {
             setStatic(ball, true);
@@ -554,7 +554,7 @@ let draw = function() {
 
 		//change player
 		player_current = player_current === player_one ? player_two : player_one;
-        player_current.text[0].style.borderBottom = "3px solid #CCC";
+        player_current.text[0].style.borderBottom = "3px solid #000000";
 
     }
 
