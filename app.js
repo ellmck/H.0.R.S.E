@@ -1,5 +1,7 @@
 "use strict";
 
+import * as Matter from "./libraries/matter";
+
 const Engine = Matter.Engine,
     World = Matter.World,
     Bodies = Matter.Bodies,
@@ -14,20 +16,17 @@ let engine;
 let mouse;
 let canvas = document.getElementById('canvas'),
     context = canvas.getContext('2d'),
-    hoop = document.getElementById("hoop"),
     scoreBoard = document.getElementById("score"),
-    arrow = document.getElementById("arrow"),
-	blindShotOverlay = document.getElementById("blindShotOverlay"),
-    playerOneText = document.getElementsByClassName("playerOne"),
-    playerTwoText = document.getElementsByClassName("playerTwo");
+    blindShotOverlay = document.getElementById("blindShotOverlay"),
+    playerOneText = document.getElementById("playerOne"),
+    playerTwoText = document.getElementById("playerTwo");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 
 //Code below is for button and shot selection
-let confirm = document.getElementById("confirm"),
-	allButtons = document.getElementsByClassName("button-container");
+let allButtons = document.getElementsByClassName("button-container");
 
 let skyShot = {
     name: "Sky",
@@ -74,69 +73,6 @@ let roofShot = {
 let shotTypes = [skyShot, blindShot, bounceShot, garageShot, swish, roofShot];
 
 let numberOfBouncesLeft = 1;
-
-function buttonSelected(shot){
-    if(shot.selected){
-        shot.selected = false;
-        shot.button.style.background='#5500FF';
-    }
-    else {
-        shot.selected = true;
-        shot.button.style.background = 'green';
-    }
-}
-
-$( "#confirm" ).click(function(event) {
-    event.preventDefault();
-
-    let shotText = " Shot";
-    let numberSelected = 0;
-    shotTypes.forEach(function (arrayItem) {
-        if (arrayItem.selected){
-            shotText = " " + arrayItem.name + shotText;
-            numberSelected++;
-        }
-		arrayItem.complete = false;
-    });
-
-    //blindShot will always be true
-    blindShot.complete = true;
-    //swish is true until rim is hit
-    swish.complete = true;
-	numberOfBouncesLeft = bounceShot.selected ? 1 : 0;
-    shotText = numberSelected > 0 ? shotText : "Normal Shot";
-    $("#shotType").text(shotText);
-
-    allButtons[0].style.display = "none";
-
-});
-
-
-$( "#skyShot" ).click(function(event) {
-    event.preventDefault();
-	buttonSelected(skyShot);
-});
-$( "#blindShot" ).click(function(event) {
-    event.preventDefault();
-	buttonSelected(blindShot);
-});
-$( "#bounceShot" ).click(function(event) {
-    event.preventDefault();
-	buttonSelected(bounceShot);
-});
-$( "#garageShot" ).click(function(event) {
-    event.preventDefault();
-	buttonSelected(garageShot);
-});
-$( "#swish" ).click(function(event) {
-    event.preventDefault();
-	buttonSelected(swish);
-});
-$( "#roofShot" ).click(function(event) {
-    event.preventDefault();
-	buttonSelected(roofShot);
-});
-
 
 //code below is for game physics
 
@@ -202,6 +138,7 @@ let player_current = player_one;
 const horse = ["", "H", "H.O", "H.O.R", "H.O.R.S", "H.O.R.S.E"];
 
 let ballInMotion = false;
+let playerCanMoveBall = false;
 
 
 let draw = function() {
@@ -301,7 +238,7 @@ let draw = function() {
                 visible: true
             }
         }),
-        rightWall = Bodies.rectangle(canvas.width + extra, -extra,  extra + extra, canvas.height * 2 + extra + extra, {
+        rightWall = Bodies.rectangle(canvas.width + extra, -extra, extra + extra, canvas.height * 2 + extra + extra, {
             isStatic: true,
             render: {
                 fillStyle: 'grey',
@@ -315,14 +252,14 @@ let draw = function() {
                 visible: true
             }
         }),
-        roof = Bodies.rectangle(0 - canvas.height , -100, canvas.height * 1.2 + extra,(ballDimensions.radius * 10) , {
+        roof = Bodies.rectangle(0 - canvas.height, -100, canvas.height * 1.2 + extra, (ballDimensions.radius * 10), {
             isStatic: true,
             render: {
                 fillStyle: 'black',
                 visible: true
             }
         });
-		Body.rotate(roof, Math.PI / 5);
+    Body.rotate(roof, Math.PI / 5);
 
     const rimRadius = 4;
 
@@ -343,57 +280,39 @@ let draw = function() {
         density: 1,
         restitution: 0.9,
         friction: 0.1,
-		render: {
-			sprite: {
-				texture: 'assets/sprites/ball2.png',
-				xScale: ballDimensions.radius * 2 / 512,
-				yScale: ballDimensions.radius * 2 / 512
-			}
+        render: {
+            sprite: {
+                texture: 'assets/sprites/ball2.png',
+                xScale: ballDimensions.radius * 2 / 512,
+                yScale: ballDimensions.radius * 2 / 512
+            }
         }
     });
 
-    // let leftBoxes = Composites.stack(net.leftRim.x, net.leftRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
-    //     return Bodies.rectangle(x, y, 6, 6);
-    // });
-	//
-    // let rightBoxes = Composites.stack(net.rightRim.x, net.rightRim.y, 5, 1, (ballDimensions.radius * 0.5), 0, function(x, y) {
-    //     return Bodies.rectangle(x, y, 6, 6);
-    // });
-	//
-    // leftBoxes.bodies[0].isStatic = true;
-    // rightBoxes.bodies[0].isStatic = true;
-	//
-    // let leftChain = Composites.chain(leftBoxes, 0, 0, -0.5, 0, {
-    //     stiffness: 1
-    // });
-    // let rightChain = Composites.chain(rightBoxes, 0, 0, -0.5, 0, {
-    //     stiffness: 1
-    // });
 
     // add all of the bodies to the world
     World.add(engine.world, [ball, ground, rightWall, garage, mouseConstraint, backboard, backboardConnector, leftRim, rightRim]);
 
     Events.on(engine, 'tick', function(event) {
 
-		if (skyShot.selected && ball.position.y < 0){
-			skyShot.complete = true;
-		}
+        if (skyShot.selected && ball.position.y < 0) {
+            skyShot.complete = true;
+        }
 
         if (Matter.SAT.collides(ball, garage).collided) {
             garageShot.complete = true;
         }
         if (Matter.SAT.collides(ball, leftRim).collided ||
             Matter.SAT.collides(ball, rightRim).collided ||
-			Matter.SAT.collides(ball, backboard).collided) {
+            Matter.SAT.collides(ball, backboard).collided) {
             swish.complete = false;
         }
 
-		var ballHitGround = Matter.SAT.collides(ball, ground).collided && ballInMotion;
+        var ballHitGround = Matter.SAT.collides(ball, ground).collided && ballInMotion;
 
-		if (ballHitGround){
-			console.log(numberOfBouncesLeft);
-			numberOfBouncesLeft--;
-		}
+        if (ballHitGround) {
+            numberOfBouncesLeft--;
+        }
         bounceShot.complete = (numberOfBouncesLeft <= 0);
 
 
@@ -407,20 +326,20 @@ let draw = function() {
             ballInMotion = false;
             scoreBoard.innerText = "YEET!";
 
-			setTimeout(function() {
-				resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
+            setTimeout(function() {
+                resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
             }, 2000);
 
         } else if (ballHitGround &&
             scoreBoard.innerText === "" &&
-			numberOfBouncesLeft < 0) {
+            numberOfBouncesLeft < 0) {
 
             ballInMotion = false;
 
-			scoreBoard.innerText = "Gutter Ball";
-			setTimeout(function() {
-				resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
-			}, 2000);
+            scoreBoard.innerText = "Gutter Ball";
+            setTimeout(function() {
+                resetForNextPlayer(ball, ballStartingX, ballStartingY, false);
+            }, 2000);
 
         }
 
@@ -430,7 +349,7 @@ let draw = function() {
     // run the engine
     Engine.run(engine);
 
-	let opacityLevel = 0;
+    let opacityLevel = 0;
 
     function getMousePosition(e) {
         mouse.x = e.mouse.position.x;
@@ -438,18 +357,18 @@ let draw = function() {
     }
 
     function mouseMoved(e) {
-        if (!mouse.isDown || ballInMotion) {
+        if (!mouse.isDown || !playerCanMoveBall) {
             return;
         }
 
-		if(blindShot.selected){
-			var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i)
-			if (isMobile) {
-				opacityLevel += 0.1;
-				blindShotOverlay.style.zIndex = "99";
-				blindShotOverlay.style.opacity = opacityLevel.toString();
-			}
-		}
+        if (blindShot.selected) {
+            let isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+            if (isMobile) {
+                opacityLevel += 0.1;
+                blindShotOverlay.style.zIndex = "99";
+                blindShotOverlay.style.opacity = opacityLevel.toString();
+            }
+        }
         getMousePosition(e);
         Body.setPosition(ball, {
             x: mouse.x,
@@ -462,11 +381,11 @@ let draw = function() {
     }
 
     function mouseDown(e) {
-        if (ballInMotion) {
+        if (!playerCanMoveBall) {
             return;
         }
-		mouse.isDown = true;
-		Body.setVelocity(ball, {
+        mouse.isDown = true;
+        Body.setVelocity(ball, {
             x: 0,
             y: 0
         });
@@ -475,31 +394,32 @@ let draw = function() {
         if (player_current.canMoveBall) {
             ballStartingX = mouse.x;
             ballStartingY = mouse.y;
-		}
-            Body.setPosition(ball, {
-                x: mouse.x,
-                y: mouse.y
-            });
+        }
+        Body.setPosition(ball, {
+            x: mouse.x,
+            y: mouse.y
+        });
 
         setStatic(ball, true);
 
     }
 
     function mouseUp(e) {
-        if (!mouse.isDown || ballInMotion) {
+        if (!mouse.isDown || !playerCanMoveBall) {
             return;
         }
-		mouse.isDown = false;
-		blindShotOverlay.style.zIndex = "0";
-		blindShotOverlay.style.opacity = 0;
-		opacityLevel = 0;
-		context.clearRect(0, 0, canvas.width, canvas.height);
+        mouse.isDown = false;
+        blindShotOverlay.style.zIndex = "0";
+        blindShotOverlay.style.opacity = "0";
+        opacityLevel = 0;
+        context.clearRect(0, 0, canvas.width, canvas.height);
         let xVelocity = (ballStartingX - ball.position.x) * 0.25;
         let yVelocity = (ballStartingY - ball.position.y) * 0.25;
 
         if (Math.abs(xVelocity) < 2 && Math.abs(yVelocity) < 2) {
-			return;
+            return;
         }
+        playerCanMoveBall = false;
         ballInMotion = true;
         setStatic(ball, false);
         Body.setVelocity(ball, {
@@ -511,19 +431,19 @@ let draw = function() {
 
     function resetForNextPlayer(ball, x, y, scored) {
 
-		player_current.scored  = scored;
+        player_current.scored = scored;
 
         numberOfBouncesLeft = bounceShot.selected ? 1 : 0;
 
         let player_other = player_current === player_one ? player_two : player_one;
 
-        if (player_current.score === horse.length || player_other.score === horse.length) {
+        if (player_current.score >= horse.length - 1 || player_other.score >= horse.length - 1) {
             location.reload();
             return;
         }
 
-		scoreBoard.innerText = "";
-        player_current.text[0].style.borderBottom = "3px hidden #000000";
+        scoreBoard.innerText = "";
+        player_current.text.style.borderBottom = "3px hidden #000000";
 
         if (scored && !player_other.scored) {
             setStatic(ball, true);
@@ -531,30 +451,30 @@ let draw = function() {
                 x: x,
                 y: y
             });
-			player_current.canMoveBall = true;
-			player_other.canMoveBall = false;
+            player_current.canMoveBall = true;
+            player_other.canMoveBall = false;
 
 
-		} else if (!scored && player_other.scored){
+        } else if (!scored && player_other.scored) {
             player_current.score++;
-			player_other.canMoveBall = true;
-			player_current.canMoveBall = false;
+            player_other.canMoveBall = true;
+            player_current.canMoveBall = false;
 
-			//show shot selection
-			allButtons[0].style.display = "grid";
+            //show shot selection
+            showOptionsScreen(true);
 
-		} else if (!scored && !player_other.scored){
-        player_other.canMoveBall = true;
-        player_current.canMoveBall = false;
-        //show shot selection
-        allButtons[0].style.display = "grid";
-    }
+        } else if (scored === player_other.scored) {
+            player_other.canMoveBall = true;
+            player_current.canMoveBall = true;
+            //show shot selection
+            showOptionsScreen(true);
+        }
 
-        player_current.text[0].innerText = player_current.name + " " + horse[player_current.score];
+        player_current.text.innerText = player_current.name + " " + horse[player_current.score];
 
-		//change player
-		player_current = player_current === player_one ? player_two : player_one;
-        player_current.text[0].style.borderBottom = "3px solid #000000";
+        //change player
+        player_current = player_current === player_one ? player_two : player_one;
+        player_current.text.style.borderBottom = "3px solid #000000";
 
     }
 
@@ -577,16 +497,83 @@ draw();
 
 
 //checks that all selected shots have been completed
-function isScored(){
-	let scored = true;
-	shotTypes.forEach(function (arrayItem) {
-		if (arrayItem.selected && !arrayItem.complete){
-			scored = false;
-		}
-	});
-	return scored;
+function isScored() {
+    let scored = true;
+    shotTypes.forEach(function(arrayItem) {
+        if (arrayItem.selected && !arrayItem.complete) {
+            scored = false;
+        }
+    });
+    return scored;
 }
 
+function showOptionsScreen(newShot){
+
+   if (newShot){
+       allButtons[0].style.display = "grid";
+   }
+}
+
+function buttonSelected(shot) {
+    if (shot.selected) {
+        shot.selected = false;
+        shot.button.style.background = '#5500FF';
+    } else {
+        shot.selected = true;
+        shot.button.style.background = 'green';
+    }
+}
+
+$("#confirm").click(function(event) {
+    event.preventDefault();
+
+    let shotText = " Shot";
+    let numberSelected = 0;
+    shotTypes.forEach(function(arrayItem) {
+        if (arrayItem.selected) {
+            shotText = " " + arrayItem.name + shotText;
+            numberSelected++;
+        }
+        arrayItem.complete = false;
+    });
+
+    //blindShot will always be true
+    blindShot.complete = true;
+    //swish is true until rim is hit
+    swish.complete = true;
+    numberOfBouncesLeft = bounceShot.selected ? 1 : 0;
+    shotText = numberSelected > 0 ? shotText : "Normal Shot";
+    $("#shotType").text(shotText);
+    allButtons[0].style.display = "none";
+
+    playerCanMoveBall = true;
+
+});
+
+$("#skyShot").click(function(event) {
+    event.preventDefault();
+    buttonSelected(skyShot);
+});
+$("#blindShot").click(function(event) {
+    event.preventDefault();
+    buttonSelected(blindShot);
+});
+$("#bounceShot").click(function(event) {
+    event.preventDefault();
+    buttonSelected(bounceShot);
+});
+$("#garageShot").click(function(event) {
+    event.preventDefault();
+    buttonSelected(garageShot);
+});
+$("#swish").click(function(event) {
+    event.preventDefault();
+    buttonSelected(swish);
+});
+$("#roofShot").click(function(event) {
+    event.preventDefault();
+    buttonSelected(roofShot);
+});
 
 //used to call animate.css
 $.fn.extend({
@@ -615,6 +602,3 @@ $.fn.extend({
         return this;
     },
 });
-
-
-

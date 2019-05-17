@@ -64,7 +64,7 @@ button:active {
 
 
 #shotType {
-    position: absolute;
+    /*position: absolute;*/
     z-index: 2;
     margin: 5%;
     font-size: 2em;
@@ -78,36 +78,31 @@ button:active {
     width: 20%;
     height: 15%;
     position: absolute;
-    left: 50%;
+    left: 60%;
     top: 5%;
-    font-size: 4em;
-    font-family: 'Concert One', cursive;
+    font-size: 3em;
+    font-family: 'Passero One', cursive;
     text-align: center;
-    color: #bebebe;
+    color: hotpink;
 }
 
-.playerOne {
+.player {
     z-index: 2;
     position:absolute;
     bottom:10%;
-    left:10%;
-    font-size: 2em;
-    font-family: 'Concert One', cursive;
+    font-size: 1.5em;
+    font-family: 'Passero One', cursive;
     text-align: left;
     color: #000000;
+}
+
+#playerOne {
+    left:10%;
     border-bottom: 3px solid #000000;
 }
 
-.playerTwo {
-    z-index: 2;
-    position:absolute;
-    bottom:10%;
+#playerTwo {
     left:50%;
-    font-size: 2em;
-    font-family: 'Concert One', cursive;
-    text-align: left;
-    color: #000000;
     border-bottom: 3px hidden #000000;
-
 }
 
