@@ -451,7 +451,7 @@ let draw = function() {
             });
             player_current.canMoveBall = true;
             player_other.canMoveBall = false;
-
+            playerCanMoveBall = true;
 
         } else if (!scored && player_other.scored) {
             player_current.score++;
