@@ -1,7 +1,5 @@
 "use strict";
 
-import * as Matter from "./libraries/matter";
-
 const Engine = Matter.Engine,
     World = Matter.World,
     Bodies = Matter.Bodies,
