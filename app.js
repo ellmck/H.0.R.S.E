@@ -138,6 +138,13 @@ const horse = ["", "H", "H.O", "H.O.R", "H.O.R.S", "H.O.R.S.E"];
 let ballInMotion = false;
 let playerCanMoveBall = false;
 
+//audio
+var clickOn = new Audio('assets/audio/ClickOn.mp3');
+var clickOff = new Audio('assets/audio/ClickOff.mp3');
+var bounce = new Audio('assets/audio/Bounce.mp3');
+var bounceBasket = new Audio('assets/audio/BounceBasket.mp3');
+var scored = new Audio('assets/audio/Scored.mp3');
+
 
 let draw = function() {
 
@@ -249,15 +256,15 @@ let draw = function() {
                 fillStyle: 'grey',
                 visible: true
             }
-        }),
-        roof = Bodies.rectangle(0 - canvas.height, -100, canvas.height * 1.2 + extra, (ballDimensions.radius * 10), {
-            isStatic: true,
-            render: {
-                fillStyle: 'black',
-                visible: true
-            }
         });
-    Body.rotate(roof, Math.PI / 5);
+    //     roof = Bodies.rectangle(0 - canvas.height, -100, canvas.height * 1.2 + extra, (ballDimensions.radius * 10), {
+    //         isStatic: true,
+    //         render: {
+    //             fillStyle: 'black',
+    //             visible: true
+    //         }
+    //     });
+    // Body.rotate(roof, Math.PI / 5);
 
     const rimRadius = 4;
 
@@ -274,10 +281,10 @@ let draw = function() {
             }
         });
 
-    let ball = Bodies.circle(net.backboardConnector.x, net.backboardConnector.y - ballDimensions.radius, ballDimensions.radius, {
+    let ball = Bodies.circle(canvas.width * 0.5, net.backboardConnector.y - ballDimensions.radius, ballDimensions.radius, {
         density: 1,
         restitution: 0.9,
-        friction: 0.1,
+        friction: 0.01,
         render: {
             sprite: {
                 texture: 'assets/sprites/ball2.png',
@@ -299,18 +306,29 @@ let draw = function() {
 
         if (Matter.SAT.collides(ball, garage).collided) {
             garageShot.complete = true;
-        }
+			playSound(bounce);
+		}
+
         if (Matter.SAT.collides(ball, leftRim).collided ||
             Matter.SAT.collides(ball, rightRim).collided ||
             Matter.SAT.collides(ball, backboard).collided) {
+
             swish.complete = false;
-        }
+			playSound(bounceBasket);
 
-        var ballHitGround = Matter.SAT.collides(ball, ground).collided && ballInMotion;
+		}
 
-        if (ballHitGround) {
-            numberOfBouncesLeft--;
-        }
+        var ballHitGround = Matter.SAT.collides(ball, ground).collided ;
+
+		if (ballHitGround){
+			if (ball.velocity.y < -1){
+				playSound(bounce);
+			}
+			if (ballInMotion) {
+				numberOfBouncesLeft--;
+			}
+		}
+
         bounceShot.complete = (numberOfBouncesLeft <= 0);
 
 
@@ -320,15 +338,14 @@ let draw = function() {
             ball.position.x < net.rightRim.x &&
             ball.position.y > net.rightRim.y - 10 &&
             ball.position.y < net.rightRim.y + 30) && isScored()) {
-
-            ballInMotion = false;
+			playSound(scored);
+			ballInMotion = false;
             scoreBoard.innerText = "YEET!";
-
             setTimeout(function() {
                 resetForNextPlayer(ball, ballStartingX, ballStartingY, true);
             }, 2000);
 
-        } else if (ballHitGround &&
+        } else if (ballHitGround && ballInMotion &&
             scoreBoard.innerText === "" &&
             numberOfBouncesLeft < 0) {
 
@@ -435,11 +452,6 @@ let draw = function() {
 
         let player_other = player_current === player_one ? player_two : player_one;
 
-        if (player_current.score >= horse.length - 1 || player_other.score >= horse.length - 1) {
-            location.reload();
-            return;
-        }
-
         scoreBoard.innerText = "";
         player_current.text.style.borderBottom = "3px hidden #000000";
 
@@ -467,6 +479,12 @@ let draw = function() {
             //show shot selection
             showOptionsScreen(true);
         }
+
+        //restart game
+		if (player_current.score >= horse.length - 1 || player_other.score >= horse.length - 1) {
+			location.reload();
+			return;
+		}
 
         player_current.text.innerText = player_current.name + " " + horse[player_current.score];
 
@@ -514,9 +532,12 @@ function showOptionsScreen(newShot){
 
 function buttonSelected(shot) {
     if (shot.selected) {
-        shot.selected = false;
+		playSound(clickOff);
+
+		shot.selected = false;
         shot.button.style.background = '#5500FF';
     } else {
+    	playSound(clickOn);
         shot.selected = true;
         shot.button.style.background = 'green';
     }
@@ -572,6 +593,11 @@ $("#roofShot").click(function(event) {
     event.preventDefault();
     buttonSelected(roofShot);
 });
+
+function playSound(audio){
+	audio.currentTime=0;
+	audio.play();
+}
 
 //used to call animate.css
 $.fn.extend({
